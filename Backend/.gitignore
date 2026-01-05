@@ -1,0 +1,39 @@
+# === [ .NET Build Results ] ===
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# === [ Visual Studio / VS Code ] ===
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# === [ Database & Secrets ] ===
+*.mdf
+*.ldf
+*.log
+.env
+.env.*
+! .env.example
+appsettings.Development.json
+# Lưu ý: appsettings.json nên được giữ lại để làm mẫu, 
+# nhưng secret thực sự nên nằm ở User Secrets hoặc Environment Variables.
+
+# === [ OS Specific ] ===
+Thumbs.db
+.DS_Store
+
+# === [ Packages ] ===
+*.nupkg
+**/packages/*
+!**/packages/build/
+node_modules/
