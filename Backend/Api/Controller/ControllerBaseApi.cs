@@ -1,7 +1,24 @@
-public class ControllerBaseApi
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using SocialFlow.Domain.Common;
+
+[ApiController]
+[Route("api/[controller]")]
+public abstract class BaseApiController : ControllerBase
 {
-    public ControllerBaseApi()
+
+    private readonly IMediator _mediator;
+    protected BaseApiController(IMediator mediator)
     {
-        Console.WriteLine("ControllerBaseApi");
+        _mediator = mediator;
+    }
+    protected IActionResult HandleResult<T>(Result<T> result, string successMessage = "Success")
+    {
+        if (result.IsSuccess)
+        {
+            return Ok(new ApiResponse<T>(result.Value!, successMessage));
+        }
+
+        return BadRequest(new ApiResponse<object>(result.Error!));
     }
 }
