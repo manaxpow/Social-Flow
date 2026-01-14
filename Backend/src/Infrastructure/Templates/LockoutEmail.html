@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .header {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 3px solid #007bff;
+      }
+      .content {
+        padding: 30px;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 15px;
+        text-align: center;
+        font-size: 12px;
+        color: #777;
+      }
+      .warning {
+        color: #d9534f;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>SocialFlow Security Alert</h2>
+      </div>
+      <div class="content">
+        <p>Xin chào <strong>{{Name}}</strong>,</p>
+        <p class="warning">
+          Tài khoản của bạn đã bị tạm khóa do phát hiện 5 lần đăng nhập sai liên
+          tiếp.
+        </p>
+        <p>
+          Để bảo vệ thông tin cá nhân và dữ liệu của bạn, hệ thống đã tự động
+          kích hoạt chế độ khóa tạm thời trong <strong>15 phút</strong>.
+        </p>
+        <p>
+          Nếu bạn không thực hiện hành động này, vui lòng đổi mật khẩu ngay lập
+          tức hoặc liên hệ với đội ngũ hỗ trợ của chúng tôi.
+        </p>
+        <a href="{{ResetLink}}" class="button">Đổi mật khẩu ngay</a>
+        <p style="margin-top: 25px">
+          Mã yêu cầu (TraceID): <code>{{TraceId}}</code>
+        </p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2026 SocialFlow - Hệ thống kết nối thông minh</p>
+        <p>Đây là email tự động, vui lòng không phản hồi email này.</p>
+      </div>
+    </div>
+  </body>
+</html>
