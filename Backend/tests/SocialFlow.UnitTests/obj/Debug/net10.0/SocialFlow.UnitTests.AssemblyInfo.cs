@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SocialFlow.UnitTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+95d8c201391dd24fe43cbf78e0356d90796132a3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34a47f97fb37163932d87486ac5fa593f9a3f010")]
 [assembly: System.Reflection.AssemblyProductAttribute("SocialFlow.UnitTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SocialFlow.UnitTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
