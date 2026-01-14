@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Thanh Nam",
+  "classifications": ["Web", "CleanArchitecture"],
+  "name": "SocialFlow Command Template",
+  "identity": "SocialFlow.Feature",
+  "shortName": "social-command",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "sourceName": "FeatureName",
+  "preferNameDirectory": true
+}

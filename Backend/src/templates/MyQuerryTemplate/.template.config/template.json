@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Thanh Nam",
+  "name": "SocialFlow Query Template",
+  "identity": "SocialFlow.Query",
+  "shortName": "social-query",
+  "sourceName": "FeatureName",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  }
+}
