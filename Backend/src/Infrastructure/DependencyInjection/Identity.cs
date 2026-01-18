@@ -33,9 +33,13 @@ public static class Identity
 
             services.Configure<IdentityOptions>(options =>
             {
+                // config lockout
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
+
+                // config email
+                options.SignIn.RequireConfirmedEmail = true;
             });
 
             services.AddAuthentication(options =>

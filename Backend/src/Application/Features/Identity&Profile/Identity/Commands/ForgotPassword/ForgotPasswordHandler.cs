@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SocialFlow.Domain.Common;
 
 public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, Result<Unit>>
 {
@@ -32,7 +31,7 @@ public class ForgotPasswordHandler : IRequestHandler<ForgotPasswordCommand, Resu
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var encodeToken = Uri.EscapeDataString(token);
-        var resetLink = $"{options.Value.BaseUrl}/{options.Value.PasswordResetPath}?email={request.Email}&token={encodeToken}";
+        var resetLink = $"{options.Value.BaseUrl}/{options.Value.PasswordResetPath}?userId={user.Id}&token={encodeToken}";
 
         _jobService.Enqueue<IEmailService>(emailService => emailService.SendPasswordResetEmailAsync(request.Email, resetLink));
 

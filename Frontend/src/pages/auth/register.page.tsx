@@ -1,7 +1,9 @@
+import RegisterPageComponent from "@/components/features/auth/register/register";
+
 export const RegisterPage = () => {
   return (
     <div>
-      <h1>Register</h1>
+      <RegisterPageComponent />
     </div>
   );
 };

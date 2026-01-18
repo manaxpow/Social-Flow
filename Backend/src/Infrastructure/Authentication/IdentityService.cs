@@ -45,11 +45,22 @@ public class IdentityService : IIdentityService
 
         if (!result.Succeeded)
         {
+            var maxAttempts = _signInManager.Options.Lockout.MaxFailedAccessAttempts;
+            var currentAttempts = await _userManager.GetAccessFailedCountAsync(user);
+            var remainingAttempts = maxAttempts - currentAttempts;
+
             _logger.LogWarning("Xác thực thất bại: Sai mật khẩu cho {Email}.", email);
+            if (remainingAttempts <= 3)
+            {
+                _logger.LogWarning("Tài khoản sẽ bị khóa: {Email}. sau {RemainingAttempts} lần.", email, remainingAttempts);
+                return Result<User>.Failure(DomainErrors.Auth.InvalidCredentials, new { RemainingAttempts = remainingAttempts });
+            }
+
             return Result<User>.Failure(DomainErrors.Auth.InvalidCredentials);
         }
 
         _logger.LogInformation("Người dùng {Email} đăng nhập thành công.", email);
+        await _userManager.ResetAccessFailedCountAsync(user);
         return Result<User>.Success(user);
     }
 

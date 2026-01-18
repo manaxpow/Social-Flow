@@ -13,7 +13,7 @@ public class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, Result
 
     public async Task<Result<Unit>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
+        var user = await _userManager.FindByIdAsync(request.UserId);
         if (user == null)
         {
             return Result<Unit>.Failure(DomainErrors.User.NotFound);

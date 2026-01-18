@@ -1,9 +1,14 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 
 public class RegisterValidator : AbstractValidator<RegisterCommand>
 {
-    public RegisterValidator()
+    private readonly UserManager<User> _userManager;
+
+    public RegisterValidator(UserManager<User> userManager)
     {
+        _userManager = userManager;
+
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
             .EmailAddress().WithMessage("A valid email is required.")
@@ -12,6 +17,12 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(8).WithMessage("Password must be at least 8 characters long.");
+
+        RuleFor(x => x.DateOfBirth)
+            .NotEmpty().WithMessage("Birth Day is required");
+
+        RuleFor(x => x.Gender)
+            .NotEmpty().WithMessage("Gender is required");
 
         RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required.")
@@ -29,9 +40,9 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
             .MaximumLength(500).WithMessage("Bio cannot exceed 500 characters.");
     }
 
-    private Task<bool> BeUniqueEmail(string email, CancellationToken cancellationToken)
+    private async Task<bool> BeUniqueEmail(string email, CancellationToken cancellationToken)
     {
-        // Placeholder for uniqueness check logic
-        return Task.FromResult(true);
+        var user = await _userManager.FindByEmailAsync(email);
+        return user == null;
     }
 }

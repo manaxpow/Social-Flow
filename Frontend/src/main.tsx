@@ -4,10 +4,12 @@ import { Provider } from "react-redux";
 // import { QueryClientProvider } from "@tanstack/react-query";
 import { store } from "./stores/index.ts";
 import { AppRouter } from "./routes/index.route.tsx";
+import { Toaster } from "./components/ui/sonner.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     {/* <QueryClientProvider client={queryClient}> */}
+    <Toaster position="top-right" richColors />
     <AppRouter />
     {/* </QueryClientProvider> */}
   </Provider>

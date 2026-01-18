@@ -9,6 +9,9 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         .IsRequired()
         .HasMaxLength(1000);
 
+        builder.Property(m => m.Type)
+        .IsRequired();
+
         builder.HasOne(m => m.Conversation)
         .WithMany()
         .HasForeignKey(m => m.ConversationId)
