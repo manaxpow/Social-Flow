@@ -19,6 +19,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <EmbeddedResource Include="Templates\LockoutEmail.html" />
     <EmbeddedResource Include="Templates\ForgotPassword.html" />
+    <EmbeddedResource Include="Templates\ConfirmEmail.html" />
   </ItemGroup>
 
   <PropertyGroup>

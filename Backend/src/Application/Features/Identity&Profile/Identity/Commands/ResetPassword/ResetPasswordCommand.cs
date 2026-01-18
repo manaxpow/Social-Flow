@@ -2,7 +2,7 @@
 using MediatR;
 
 public record ResetPasswordCommand(
-    string Email,
+    string UserId,
     string Password,
     string Token
 ) : IRequest<Result<Unit>>;

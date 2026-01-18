@@ -6,5 +6,8 @@ public class ConversationMemberConfiguration : IEntityTypeConfiguration<Conversa
     public void Configure(EntityTypeBuilder<ConversationMember> builder)
     {
         builder.HasIndex(c => new { c.ConversationId, c.UserId }).IsUnique();
+
+        builder.Property(cm => cm.Nickname)
+            .IsRequired();
     }
 }

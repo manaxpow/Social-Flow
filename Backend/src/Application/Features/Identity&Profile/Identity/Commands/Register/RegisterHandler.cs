@@ -1,16 +1,20 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Guid>>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<RegisterResponse>>
 {
     private readonly UserManager<User> _userManager;
-
-    public RegisterCommandHandler(UserManager<User> userManager)
+    private readonly IOptions<ClientSettings> options;
+    private readonly IJobService _jobService;
+    public RegisterCommandHandler(UserManager<User> userManager, IOptions<ClientSettings> clientSettings, IJobService jobService)
     {
         _userManager = userManager;
+        options = clientSettings;
+        _jobService = jobService;
     }
 
-    public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var user = new User
         {
@@ -19,15 +23,24 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Gu
             FirstName = request.FirstName,
             LastName = request.LastName,
             AvatarUrl = request.AvatarUrl,
-            Bio = request.Bio
+            Bio = request.Bio,
+            DateOfBirth = request.DateOfBirth,
+            Gender = request.Gender
         };
         var result = await _userManager.CreateAsync(user, request.Password);
 
         if (!result.Succeeded)
         {
-            return Result<Guid>.Failure(result.Errors.Select(x => x.Description).ToList());
+            return Result<RegisterResponse>.Failure(result.Errors.Select(x => x.Description).ToList());
         }
 
-        return Result<Guid>.Success(user.Id);
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encodedToken = Uri.EscapeDataString(token);
+        var confirmationLink =
+        $"{options.Value.BaseUrl}/{options.Value.EmailConfirmationPath}?userId={user.Id}&token={encodedToken}";
+
+        _jobService.Enqueue<IEmailService>(emailService => emailService.SendEmailConfirmationEmailAsync(user.LastName, user.Email, confirmationLink));
+
+        return Result<RegisterResponse>.Success(new RegisterResponse { Id = user.Id });
     }
 }

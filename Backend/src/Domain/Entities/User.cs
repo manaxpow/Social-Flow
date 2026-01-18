@@ -4,6 +4,8 @@ public class User : IdentityUser<Guid>
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public DateTime DateOfBirth { get; set; }
+    public Gender Gender { get; set; }
     public string? AvatarUrl { get; set; } = string.Empty;
     public string? Bio { get; set; } = string.Empty;
     public string Provider { get; set; } = "Local";

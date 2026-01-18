@@ -27,6 +27,26 @@ public class EmailService(IOptions<EmailSettings> options) : IEmailService
         }
     }
 
+    public async Task SendEmailConfirmationEmailAsync(string name, string email, string linkConfirmationToken)
+    {
+        var assembly = typeof(EmailService).Assembly;
+        var resourceName = "Infrastructure.Templates.ConfirmEmail.html";
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            var names = assembly.GetManifestResourceNames();
+            throw new Exception($"Không tìm thấy template. Các resource hiện có: {string.Join(", ", names)}");
+        }
+
+        using var reader = new StreamReader(stream);
+        var template = await reader.ReadToEndAsync();
+
+        var body = template
+            .Replace("{{ConfirmationLink}}", linkConfirmationToken)
+            .Replace("{{UserName}}", name);
+        await SendEmailAsync(email, "Yêu cầu đặt lại mật khẩu", body);
+    }
+
     public async Task SendLockoutEmailAsync(string email, string name, string traceId)
     {
         var assembly = typeof(EmailService).Assembly;

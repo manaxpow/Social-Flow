@@ -20,7 +20,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, Result<LoginResponse>>
 
         if (result.IsFailure)
         {
-            return Result<LoginResponse>.Failure(result.Error);
+            return Result<LoginResponse>.Failure(result.Error, result.Metadata);
         }
 
         var accessToken = _jwtTokenGenerator.GenerateToken(result.Value!);

@@ -29,13 +29,8 @@ public class GlobalExceptionMiddleware(
             context.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/problem+json";
 
-            var jsonResponse = JsonSerializer.Serialize(problemDetails, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-            });
-
-            await context.Response.WriteAsync(jsonResponse);
+            await context.Response.WriteAsJsonAsync(problemDetails, problemDetails.GetType(),
+            options: null, contentType: "application/problem+json");
         }
     }
 }

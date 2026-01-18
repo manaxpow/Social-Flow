@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialFlow.Domain.Common;
 
 [Authorize]
 public class AuthController(IMediator mediator) : BaseApiController(mediator)
@@ -12,18 +11,22 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
     public async Task<IActionResult> Login([FromBody] LoginCommand command)
     {
         var result = await _mediator.Send(command);
-
-        CookiesHelper.AppendCookie(Response, "accessToken", result.Value!.AccessToken, 15); // 15 minutes
-        CookiesHelper.AppendCookie(Response, "refreshToken", result.Value!.RefreshToken, 10080); // 7 days
-
-        var resultWithoutToken = Result<LoginResponse>.Success(new LoginResponse
+        if (result.IsSuccess && result.Value != null)
         {
-            Id = result.Value!.Id,
-            AccessToken = string.Empty,
-            RefreshToken = string.Empty
-        });
 
-        return HandleResult(resultWithoutToken);
+            CookiesHelper.AppendCookie(Response, "accessToken", result.Value.AccessToken, 15); // 15 minutes
+            CookiesHelper.AppendCookie(Response, "refreshToken", result.Value.RefreshToken, 10080); // 7 days
+
+            var resultWithoutToken = Result<LoginResponse>.Success(new LoginResponse
+            {
+                Id = result.Value.Id,
+                AccessToken = string.Empty,
+                RefreshToken = string.Empty
+            });
+            return HandleResult(resultWithoutToken);
+        }
+
+        return HandleResult(result);
     }
 
     [AllowAnonymous]
@@ -46,8 +49,9 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
         var refreshToken = CookiesHelper.GetCookie(Request, "refreshToken");
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return Unauthorized(new ApiResponse<object>(null!, "Refresh token is missing"));
+            return HandleResult(Result<LoginResponse>.Failure(DomainErrors.Auth.InvalidToken));
         }
+
         var command = new RefreshTokenCommand(refreshToken);
         var result = await _mediator.Send(command);
         if (result.IsSuccess)
@@ -87,11 +91,19 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
         return HandleResult(result);
     }
 
+    [AllowAnonymous]
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return HandleResult(result);
+    }
+
     [HttpPost("logout")]
     public IActionResult Logout()
     {
         CookiesHelper.DeleteCookie(Response, "accessToken");
         CookiesHelper.DeleteCookie(Response, "refreshToken");
-        return Ok(new ApiResponse<object>(null!, "Logout successful"));
+        return Ok();
     }
 }

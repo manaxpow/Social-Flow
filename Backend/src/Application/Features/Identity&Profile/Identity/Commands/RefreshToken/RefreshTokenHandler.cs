@@ -1,5 +1,4 @@
 using MediatR;
-using SocialFlow.Domain.Common;
 
 public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Result<LoginResponse>>
 {
