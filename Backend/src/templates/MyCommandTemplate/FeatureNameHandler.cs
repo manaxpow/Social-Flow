@@ -1,15 +1,15 @@
-public class FeatureNameHandler : IRequestHandler<FeatureNameCommand, ApiResponse<FeatureNameResponse>>
+public class FeatureNameHandler : IRequestHandler<FeatureNameCommand, Result<FeatureNameResponse>>
 {
-    private readonly IAppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public FeatureNameHandler(IAppDbContext context)
+    public FeatureNameHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
-    public async Task<ApiResponse<FeatureNameResponse>> Handle(FeatureNameCommand request, CancellationToken cancellationToken)
+    public async Task<Result<FeatureNameResponse>> Handle(FeatureNameCommand request, CancellationToken cancellationToken)
     {
         // TODO: Implement business logic
-        return ApiResponse<FeatureNameResponse>.Success(new FeatureNameResponse());
+        return Result<FeatureNameResponse>.Success(new FeatureNameResponse());
     }
 }

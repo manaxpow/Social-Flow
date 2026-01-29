@@ -30,13 +30,13 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("ParentCommentId")
                         .HasColumnType("uuid");
@@ -140,6 +140,38 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId2");
 
                     b.ToTable("Friendships");
+                });
+
+            modelBuilder.Entity("Mention", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CommentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Mention");
                 });
 
             modelBuilder.Entity("Message", b =>
@@ -328,6 +360,100 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TargetType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ReceiverId", "CreatedAt");
+
+                    b.HasIndex("ReceiverId", "IsRead");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
+            modelBuilder.Entity("OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastAttemptAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedAt")
+                        .HasFilter("\"ProcessedAt\" IS NULL");
+
+                    b.ToTable("OutboxMessages", (string)null);
+                });
+
             modelBuilder.Entity("Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -337,8 +463,10 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
@@ -348,12 +476,24 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<string>("MediaUrl")
                         .HasColumnType("text");
 
+                    b.Property<int>("ReactionCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("SharedPostId")
+                        .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<string>("TopReactTypes")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("SharedPostId");
 
                     b.ToTable("Posts");
                 });
@@ -563,6 +703,31 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("User2");
                 });
 
+            modelBuilder.Entity("Mention", b =>
+                {
+                    b.HasOne("Comment", "Comment")
+                        .WithMany("Mentions")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Post", "Post")
+                        .WithMany("Mentions")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Message", b =>
                 {
                     b.HasOne("Conversation", "Conversation")
@@ -652,6 +817,24 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Notification", b =>
+                {
+                    b.HasOne("User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Post", b =>
                 {
                     b.HasOne("User", "Author")
@@ -660,7 +843,46 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Post", "SharedPost")
+                        .WithMany("Shares")
+                        .HasForeignKey("SharedPostId");
+
+                    b.OwnsMany("CommentPreview", "TopComments", b1 =>
+                        {
+                            b1.Property<Guid>("PostId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<string>("AuthorAvatarUrl");
+
+                            b1.Property<string>("AuthorName")
+                                .IsRequired();
+
+                            b1.Property<string>("Content")
+                                .IsRequired();
+
+                            b1.Property<DateTime>("CreatedAt");
+
+                            b1.Property<Guid>("Id");
+
+                            b1.Property<int>("ReactionCount");
+
+                            b1.HasKey("PostId", "__synthesizedOrdinal");
+
+                            b1.ToTable("Posts");
+
+                            b1.ToJson("TopComments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PostId");
+                        });
+
                     b.Navigation("Author");
+
+                    b.Navigation("SharedPost");
+
+                    b.Navigation("TopComments");
                 });
 
             modelBuilder.Entity("Reaction", b =>
@@ -674,9 +896,18 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Comment", b =>
+                {
+                    b.Navigation("Mentions");
+                });
+
             modelBuilder.Entity("Post", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Mentions");
+
+                    b.Navigation("Shares");
                 });
 
             modelBuilder.Entity("User", b =>

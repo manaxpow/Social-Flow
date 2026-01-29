@@ -7,6 +7,9 @@ public class BaseRepository<T>(ApplicationDbContext context) : IGenericRepositor
     protected readonly ApplicationDbContext _context = context;
     protected readonly DbSet<T> _dbSet = context.Set<T>();
 
+    public async Task AddRangeAsync(IEnumerable<T> entities)
+        => await _dbSet.AddRangeAsync(entities);
+
     public async Task<T?> GetByIdAsync(Guid id)
         => await _dbSet.FindAsync(id);
 

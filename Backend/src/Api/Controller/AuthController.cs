@@ -49,7 +49,7 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
         var refreshToken = CookiesHelper.GetCookie(Request, "refreshToken");
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return HandleResult(Result<LoginResponse>.Failure(DomainErrors.Auth.InvalidToken));
+            return HandleResult(Result<LoginResponse>.Failure(AuthErrors.InvalidToken));
         }
 
         var command = new RefreshTokenCommand(refreshToken);

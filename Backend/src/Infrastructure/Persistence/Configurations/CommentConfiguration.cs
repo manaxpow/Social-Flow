@@ -7,7 +7,7 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
     {
         builder.ToTable("Comments");
 
-        builder.Property(c => c.Description)
+        builder.Property(c => c.Content)
             .IsRequired()
             .HasMaxLength(1000);
 

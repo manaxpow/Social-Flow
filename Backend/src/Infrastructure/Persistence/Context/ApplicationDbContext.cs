@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ConversationMember> ConversationMembers => Set<ConversationMember>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<MessageReceipt> MessageReceipts => Set<MessageReceipt>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

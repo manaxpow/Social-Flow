@@ -5,7 +5,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 {
     public UserRepository(ApplicationDbContext context) : base(context)
     {
-
     }
 
     public Task<User?> GetByRefreshTokenAsync(string refreshToken)

@@ -21,12 +21,12 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Result<L
 
         if (result is null)
         {
-            return Result<LoginResponse>.Failure(DomainErrors.Auth.InvalidToken);
+            return Result<LoginResponse>.Failure(AuthErrors.InvalidToken);
         }
 
         if (result.RefreshTokenExpiryTime < DateTime.UtcNow)
         {
-            return Result<LoginResponse>.Failure(DomainErrors.Auth.TokenExpired);
+            return Result<LoginResponse>.Failure(AuthErrors.TokenExpired);
         }
 
         var accessToken = _jwtTokenGenerator.GenerateToken(result);

@@ -1,0 +1,1 @@
+public interface IReactionRepository : IGenericRepository<Reaction> { }

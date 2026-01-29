@@ -37,3 +37,4 @@ Thumbs.db
 **/packages/*
 !**/packages/build/
 node_modules/
+.fake
