@@ -5,6 +5,8 @@ using Hangfire;
 using Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
+using Serilog.Events;
+using SocialFlow.Domain.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,7 @@ try
     builder.Services.AddInfrastructureServices(builder.Configuration);
     builder.Services.AddApplicationServices();
 
+    builder.Services.AddSignalR();
     // Add cors
 
     var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
@@ -73,11 +76,23 @@ try
 
     // Add swagger
     builder.Services.AddOpenApi();
+
     builder.Services.AddSwaggerDocumentaion();
 
     var app = builder.Build();
-
     app.UseCors("SocialFlowCorsPolicy");
+
+    // Use Serilog request logging 
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.GetLevel = (httpContext, elapsed, ex) =>
+        {
+            if (httpContext.Response.StatusCode < 500 || ex is ValidationException)
+                return LogEventLevel.Information;
+
+            return LogEventLevel.Error;
+        };
+    });
     // Use global exception handling middleware
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -86,21 +101,40 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
+
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialFlow API v1");
+        });
     }
-    // Use Serilog request logging 
-    app.UseSerilogRequestLogging();
+    else
+    {
+        app.UseHttpsRedirection();
+    }
 
 
-    app.UseHttpsRedirection();
 
     app.UseRateLimiter();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
     app.MapControllers();
 
     app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
 
     });
+
+    // Add SignalR
+    app.MapHub<NotificationHub>("/hubs/notifications");
+
+    // Cron job
+    app.Services.UseBackgroundJobs();
+
     app.Run();
+
 
 }
 catch (Exception ex)
@@ -111,3 +145,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program { }

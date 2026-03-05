@@ -26,6 +26,9 @@ public static class Persistence
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IReactionRepository, ReactionRepository>();
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
 
 
         // Dapper
@@ -34,6 +37,7 @@ public static class Persistence
         services.AddScoped<IPostQueries, PostQueries>();
         services.AddScoped<ICommentQueries, CommentQueries>();
         services.AddScoped<IReactionQueries, ReactionQueries>();
+        services.AddScoped<IUserQuries, UserQueries>();
 
         return services;
     }

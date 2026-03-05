@@ -1,9 +1,9 @@
-
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 public record CreatePostCommand(
     string Content,
-    string? MediaUrl,
     Guid? SharedPostId,
+    List<IFormFile>? Files,
     List<Guid> MentionedUserIds
 ) : IRequest<Result<PostResponse>>;

@@ -16,4 +16,35 @@ public class OutboxMessage : BaseEntity
         OccurredAt = DateTime.UtcNow;
         AttemptCount = 0;
     }
+    public void UpdateContent(string content)
+    {
+        Content = content;
+    }
+
+    public void UpdateError(string error)
+    {
+        Error = error;
+    }
+
+    public void MarkAsProcessed(DateTime processedAt, string? error = null, int attemptCount = 0, DateTime? lastAttemptAt = null)
+    {
+        ProcessedAt = processedAt;
+        Error = error;
+        AttemptCount = attemptCount;
+        LastAttemptAt = lastAttemptAt;
+    }
+
+    public void MarkAsFailed(DateTime failedAt, int attemptCount = 0, DateTime? lastAttemptAt = null)
+    {
+        ProcessedAt = failedAt;
+        AttemptCount = attemptCount;
+        LastAttemptAt = lastAttemptAt;
+    }
+
+    public void IncrementAttemptCount()
+    {
+        AttemptCount += 1;
+        LastAttemptAt = DateTime.UtcNow;
+    }
+
 }

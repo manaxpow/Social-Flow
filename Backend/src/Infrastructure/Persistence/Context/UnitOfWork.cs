@@ -14,6 +14,7 @@ public class UnitOfWork(ApplicationDbContext context, IServiceProvider servicePr
     public IReactionRepository Reactions => serviceProvider.GetRequiredService<IReactionRepository>();
     public IFriendshipRepository Friendships => serviceProvider.GetRequiredService<IFriendshipRepository>();
     public INotificationRepository Notifications => serviceProvider.GetRequiredService<INotificationRepository>();
+    public IMentionRepository Mentions => serviceProvider.GetRequiredService<IMentionRepository>();
 
 
     // Generic repository

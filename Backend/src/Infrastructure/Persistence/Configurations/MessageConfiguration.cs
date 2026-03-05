@@ -9,6 +9,17 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         .IsRequired()
         .HasMaxLength(1000);
 
+        builder.OwnsMany(p => p.Images, img =>
+        {
+            img.ToTable("MessageImages"); // Tên bảng lưu ảnh
+            img.WithOwner().HasForeignKey("MessageId");
+            img.Property<Guid>("Id");
+            img.HasKey("Id");
+
+            img.Property(x => x.Url).IsRequired();
+            img.Property(x => x.PublicId).IsRequired();
+        });
+
         builder.Property(m => m.Type)
         .IsRequired();
 

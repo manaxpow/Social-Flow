@@ -18,7 +18,28 @@ import {
 import { Link } from "react-router-dom";
 import { NotificationIcon } from "@/components/ui/notification";
 
+// Import Redux hooks và action
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/stores";
+import { logoutAction } from "@/stores/auth/auth.slice";
+
 export const LoginDropdown = () => {
+  // Lấy dispatch và thông tin user từ Redux store
+  const dispatch = useDispatch(); // Dùng useDispatch<AppDispatch>() nếu có setup type
+  const { user } = useSelector((state: RootState) => state.auth); // Dùng (state: RootState) nếu có setup type
+
+  const handleLogout = () => {
+    dispatch(logoutAction() as any); // Cast to any nếu chưa setup AppDispatch type
+  };
+
+  // Tạo chữ cái đầu cho Avatar Fallback (ví dụ: "John Doe" -> "JD" hoặc "J")
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name[0].toUpperCase();
+  };
+
   return (
     <div className="flex items-center gap-4">
       <div className="flex items-center gap-1 md:gap-3">
@@ -39,17 +60,24 @@ export const LoginDropdown = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-9 w-9 rounded-full">
             <Avatar className="h-12 w-12">
-              <AvatarImage src="/placeholder-user.jpg" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
+              {/* Load avatar từ user data, nếu không có thì dùng ảnh mặc định */}
+              <AvatarImage
+                src={user?.avatarUrl || "/placeholder-user.jpg"}
+                alt={user?.firstName || "User avatar"}
+              />
+              <AvatarFallback>{getInitials(user?.firstName)}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">John Doe</p>
+              {/* Hiển thị tên và email thật từ Redux */}
+              <p className="text-sm font-medium leading-none">
+                {user?.firstName || "Người dùng"}
+              </p>
               <p className="text-xs leading-none text-muted-foreground">
-                john.doe@example.com
+                {user?.email || "Chưa cập nhật email"}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -71,7 +99,11 @@ export const LoginDropdown = () => {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive cursor-pointer">
+          {/* Gắn sự kiện onClick gọi hàm handleLogout */}
+          <DropdownMenuItem
+            className="text-destructive cursor-pointer"
+            onClick={handleLogout}
+          >
             <LogOut className="mr-2 h-4 w-4" /> Log out
           </DropdownMenuItem>
         </DropdownMenuContent>

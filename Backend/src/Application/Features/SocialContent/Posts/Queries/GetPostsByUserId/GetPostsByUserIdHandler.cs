@@ -3,20 +3,28 @@ using MediatR;
 
 namespace Shop.Application.Features.Placeholder.Commands.GetPostsByUserId;
 
-public class GetPostsByUserIdHandler : IRequestHandler<GetPostsByUserIdQuery, Result<PagedList<PostResponse>>>
+public class GetPostsByUserIdHandler : IRequestHandler<GetPostsByUserIdQuery, Result<PagedList<PostDetailReponse>>>
 {
     private readonly IMapper _mapper;
-    private readonly IPostQueries _postQueries;
+    private readonly IPostRepository _postRepository;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GetPostsByUserIdHandler(IMapper mapper, IPostQueries postQueries)
+    public GetPostsByUserIdHandler(IMapper mapper, IPostRepository postRepository, ICurrentUserService currentUserService)
     {
         _mapper = mapper;
-        _postQueries = postQueries;
+        _postRepository = postRepository;
+        _currentUserService = currentUserService;
     }
 
-    public async Task<Result<PagedList<PostResponse>>> Handle(GetPostsByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedList<PostDetailReponse>>> Handle(GetPostsByUserIdQuery request, CancellationToken cancellationToken)
     {
-        var posts = await _postQueries.GetPostsByUserIdAsync(request.UserId, request.PageNumber, request.PageSize, cancellationToken);
-        return Result<PagedList<PostResponse>>.Success(_mapper.Map<PagedList<PostResponse>>(posts));
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId == null)
+        {
+            return Result<PagedList<PostDetailReponse>>.Failure(AuthErrors.Unauthorized);
+        }
+        var posts = await _postRepository.GetPostsByUserIdAsync(currentUserId.Value, request.PageNumber, request.PageSize, cancellationToken);
+        return Result<PagedList<PostDetailReponse>>.Success(_mapper.Map<PagedList<PostDetailReponse>>(posts));
     }
 }

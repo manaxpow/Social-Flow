@@ -6,6 +6,7 @@
 
   <ItemGroup>
   <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  <PackageReference Include="CloudinaryDotNet" Version="1.28.0" />
   <PackageReference Include="Hangfire.AspNetCore" Version="1.8.22" />
   <PackageReference Include="Hangfire.PostgreSql" Version="1.20.13" />
   <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.12.0" />

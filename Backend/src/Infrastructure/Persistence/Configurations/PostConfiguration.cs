@@ -12,6 +12,17 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.Property(p => p.ReactionCount)
         .IsRequired();
 
+        builder.OwnsMany(p => p.Images, img =>
+        {
+            img.ToTable("PostImages"); // Tên bảng lưu ảnh
+            img.WithOwner().HasForeignKey("PostId");
+            img.Property<Guid>("Id");
+            img.HasKey("Id");
+
+            img.Property(x => x.Url).IsRequired();
+            img.Property(x => x.PublicId).IsRequired();
+        });
+
         builder.Property(p => p.CommentCount)
         .IsRequired();
 

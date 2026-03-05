@@ -32,10 +32,6 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
             .NotEmpty().WithMessage("Last name is required.")
             .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters.");
 
-        // Simplified: MaximumLength only triggers if a value is provided
-        RuleFor(x => x.AvatarUrl)
-            .MaximumLength(200).WithMessage("Avatar URL cannot exceed 200 characters.");
-
         RuleFor(x => x.Bio)
             .MaximumLength(500).WithMessage("Bio cannot exceed 500 characters.");
     }

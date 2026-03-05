@@ -23,7 +23,7 @@ public class UpdateReactionHandler : IRequestHandler<UpdateReactionCommand, Resu
         if (reaction.UserId != _currentUserService.UserId)
             return Result<ReactionResponse>.Failure(AuthErrors.Unauthorized);
 
-        reaction.ReactType = request.ReactType;
+        reaction.UpdateReactType(request.ReactType);
 
         _unitOfWork.Reactions.Update(reaction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

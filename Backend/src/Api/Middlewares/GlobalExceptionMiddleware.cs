@@ -1,4 +1,5 @@
 using System.Text.Json;
+using SocialFlow.Domain.Exceptions;
 
 public class GlobalExceptionMiddleware(
     RequestDelegate next,
@@ -15,7 +16,11 @@ public class GlobalExceptionMiddleware(
         catch (Exception ex)
         {
             var traceId = context.Items["CorrelationId"]?.ToString() ?? context.TraceIdentifier;
-            if (ex is AppException appEx)
+            if (ex is ValidationException)
+            {
+                logger.LogInformation("Validation failed for request {TraceId}", traceId);
+            }
+            else if (ex is AppException appEx)
             {
                 logger.LogWarning(ex, "AppException occurred. Error ID: {TraceId}. Message: {Message}", traceId, appEx.Message);
             }

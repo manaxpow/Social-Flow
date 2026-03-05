@@ -12,12 +12,12 @@ const AUTH_PATH = "/auth";
 
 export const authService = {
   login: async (
-    credentials: LoginValues
+    credentials: LoginValues,
   ): Promise<ApiResponse<LoginResponse>> => {
     try {
       const response = await api.post<LoginResponse>(
         `${AUTH_PATH}/login`,
-        credentials
+        credentials,
       );
 
       return {
@@ -32,12 +32,12 @@ export const authService = {
   },
 
   register: async (
-    credentials: RegisterRequest
+    credentials: RegisterRequest,
   ): Promise<ApiResponse<RegisterResponse>> => {
     try {
       const response = await api.post<RegisterResponse>(
         `${AUTH_PATH}/register`,
-        credentials
+        credentials,
       );
 
       return {
@@ -52,7 +52,7 @@ export const authService = {
   },
 
   confirmEmail: async (
-    request: ConfirmEmailRequest
+    request: ConfirmEmailRequest,
   ): Promise<ApiResponse<null>> => {
     try {
       const response = await api.post(`${AUTH_PATH}/confirm-email`, request);
@@ -86,7 +86,7 @@ export const authService = {
   },
 
   resetPassword: async (
-    request: ResetPasswordRequest
+    request: ResetPasswordRequest,
   ): Promise<ApiResponse<null>> => {
     try {
       const response = await api.post(`${AUTH_PATH}/reset-password`, request);
@@ -119,6 +119,8 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     await api.post(`${AUTH_PATH}/logout`);
-    window.location.href = "/auth/login";
+    if (window.location.pathname !== "/auth/login") {
+      window.location.href = "/auth/login";
+    }
   },
 };

@@ -1,6 +1,6 @@
 using MediatR;
 
-public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Result<LoginResponse>>
+public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Result<RefreshTokenResponse>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -15,18 +15,18 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Result<L
         _identityService = identityService;
     }
 
-    public async Task<Result<LoginResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RefreshTokenResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var result = await _userRepository.GetByRefreshTokenAsync(request.RefreshToken);
 
         if (result is null)
         {
-            return Result<LoginResponse>.Failure(AuthErrors.InvalidToken);
+            return Result<RefreshTokenResponse>.Failure(AuthErrors.InvalidToken);
         }
 
         if (result.RefreshTokenExpiryTime < DateTime.UtcNow)
         {
-            return Result<LoginResponse>.Failure(AuthErrors.TokenExpired);
+            return Result<RefreshTokenResponse>.Failure(AuthErrors.TokenExpired);
         }
 
         var accessToken = _jwtTokenGenerator.GenerateToken(result);
@@ -35,9 +35,8 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Result<L
         await _userRepository.UpdateRefreshTokenAsync(result.Id, newRefreshToken, DateTime.UtcNow.AddDays(7));
         await _unitOfWork.SaveChangesAsync();
 
-        return Result<LoginResponse>.Success(new LoginResponse
+        return Result<RefreshTokenResponse>.Success(new RefreshTokenResponse
         {
-            Id = result.Id,
             AccessToken = accessToken,
             RefreshToken = newRefreshToken
         });

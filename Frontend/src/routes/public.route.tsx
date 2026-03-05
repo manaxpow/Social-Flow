@@ -3,6 +3,7 @@ import { LoginPage } from "../pages/auth/login.page";
 import { RegisterPage } from "../pages/auth/register.page";
 
 export const publicRoutes: RouteObject[] = [
-  { path: "about", element: <LoginPage /> },
-  { path: "policy", element: <RegisterPage /> },
+  { index: true, element: <LoginPage /> },
+  { path: "login", element: <LoginPage /> },
+  { path: "register", element: <RegisterPage /> },
 ];

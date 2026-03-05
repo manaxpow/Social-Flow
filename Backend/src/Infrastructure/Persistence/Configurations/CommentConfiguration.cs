@@ -13,5 +13,16 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
 
         builder.Property(c => c.CreatedAt)
             .IsRequired();
+
+        builder.OwnsMany(p => p.Images, img =>
+        {
+            img.ToTable("CommentImages"); // Tên bảng lưu ảnh
+            img.WithOwner().HasForeignKey("CommentId");
+            img.Property<Guid>("Id");
+            img.HasKey("Id");
+
+            img.Property(x => x.Url).IsRequired();
+            img.Property(x => x.PublicId).IsRequired();
+        });
     }
 }

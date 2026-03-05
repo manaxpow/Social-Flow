@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "erasableSyntaxOnly": false,
+    "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

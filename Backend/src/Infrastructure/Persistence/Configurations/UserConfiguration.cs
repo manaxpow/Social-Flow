@@ -7,6 +7,22 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable("Users");
 
+        builder.OwnsOne(u => u.Avatar, a =>
+        {
+            // Ánh xạ thuộc tính Url của CloudImage thành cột AvatarUrl trong bảng Users
+            a.Property(p => p.Url)
+                .HasColumnName("AvatarUrl")
+                .HasMaxLength(500);
+
+            // Ánh xạ thuộc tính PublicId thành cột AvatarPublicId
+            a.Property(p => p.PublicId)
+                .HasColumnName("AvatarPublicId")
+                .HasMaxLength(200);
+
+            // Nếu bạn muốn Avatar có thể null (User không có ảnh)
+            // a.Property(p => p.Url).IsRequired(false);
+        });
+
         builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(100);

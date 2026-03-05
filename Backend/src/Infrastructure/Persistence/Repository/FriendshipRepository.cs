@@ -7,6 +7,12 @@ public class FriendshipRepository : BaseRepository<Friendship>, IFriendshipRepos
     {
     }
 
+    public Task<Friendship?> GetByUsersAsync(Guid userReceiveId, Guid userSendId, CancellationToken cancellationToken = default)
+    {
+        return _dbSet.FirstOrDefaultAsync(f => f.UserId1 == userReceiveId && f.UserId2 == userSendId
+        || f.UserId1 == userSendId && f.UserId2 == userReceiveId, cancellationToken);
+    }
+
     public Task<List<Guid>> GetFriendsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         // need to check the relations opposite is not blocked

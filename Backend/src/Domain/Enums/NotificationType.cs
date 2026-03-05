@@ -15,6 +15,7 @@ public enum NotificationType
     SecurityAlert = 21,
 
     // Future Expansion (Optional)
-    FriendRequest = 30,
+    FriendRequestAccepted = 31,
+    FriendRequestReceived = 32,
     Message = 40
 }

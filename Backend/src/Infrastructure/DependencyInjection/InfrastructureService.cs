@@ -12,7 +12,8 @@ public static class InfrastructureService
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IJobService, JobService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IWebNotificationService, WebNotificationService>();
         // Transient
         services.AddTransient<IEmailService, EmailService>();
         return services;

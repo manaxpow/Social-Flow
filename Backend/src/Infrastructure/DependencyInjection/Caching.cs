@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 public static class CachingExtensions
 {
@@ -12,6 +13,9 @@ public static class CachingExtensions
             options.Configuration = connectionString;
             options.InstanceName = "SocialFlow_Cache:"; // Tất cả key cache sẽ có tiền tố này
         });
+
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(connectionString));
+        services.AddSingleton<IUserTracker, RedisUserTracker>();
 
         return services;
     }
