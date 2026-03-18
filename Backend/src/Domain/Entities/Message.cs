@@ -1,11 +1,11 @@
-public class Message : BaseEntity
+public class Message : Entity
 {
-    public Guid ConversationId { get; set; }
-    public Conversation Conversation { get; set; } = null!;
-    public Guid SenderId { get; set; }
-    public User Sender { get; set; } = null!;
-    public string Content { get; set; } = string.Empty;
-    public MessageType Type { get; set; } = MessageType.Text;
+    public Guid ConversationId { get; private set; }
+    public Conversation Conversation { get; private set; } = null!;
+    public Guid SenderId { get; private set; }
+    public User Sender { get; private set; } = null!;
+    public string Content { get; private set; } = string.Empty;
+    public MessageType Type { get; private set; } = MessageType.Text;
 
     public Message() { }
 }

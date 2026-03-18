@@ -1,7 +1,7 @@
-public class Conversation : BaseEntity
+public class Conversation : Entity
 {
-    public string Title { get; set; } = string.Empty;
-    public bool IsGroup { get; set; } = false;
+    public string Title { get; private set; } = string.Empty;
+    public bool IsGroup { get; private set; } = false;
     public Conversation()
     { }
 }

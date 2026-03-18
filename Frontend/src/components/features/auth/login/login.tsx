@@ -14,9 +14,10 @@ import {
 import { loginSchema, type LoginValues } from "@/lib/zod/auth/login.schema";
 import { SocialLogin } from "../social.login";
 import { useState } from "react"; // Thêm useState
-import type { LoginRequest } from "@/services/auth/dtos/login/login.request";
-import { authService } from "@/services/auth/auth.service";
 import { toast } from "sonner";
+import { useAppDispatch } from "@/stores/hook";
+import { loginAction } from "@/stores/auth/auth.slice";
+import type { ErrorApiResponse } from "@/types/error.response";
 
 export default function LoginPageComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,30 +31,28 @@ export default function LoginPageComponent() {
   });
 
   const isLoading = form.formState.isSubmitting;
+
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const onSubmit = async (values: LoginValues) => {
-    const request: LoginRequest = {
-      email: values.email,
-      password: values.password,
-    };
+    const resultAction = await dispatch(loginAction(values));
 
-    const response = await authService.login(request);
-
-    if (response.isSuccess) {
-      navigate("/");
+    if (loginAction.fulfilled.match(resultAction)) {
       toast.success("Login successful!");
-      return response;
-    } else {
-      const remaining = response.error?.remainingAttempts;
-      if (remaining)
-        toast.warning(`Login failed. ${remaining} attempts remaining.`);
-      else
-        toast.error(
-          response.error?.detail ?? "Login failed. Please try again."
-        );
+      navigate("/");
     }
-    return response;
+
+    if (loginAction.rejected.match(resultAction)) {
+      const errorData = resultAction.payload as ErrorApiResponse;
+      const remaining = errorData?.remainingAttempts;
+
+      if (remaining !== undefined) {
+        toast.warning(`Login failed. ${remaining} attempts remaining.`);
+      } else {
+        toast.error(errorData?.detail ?? "Login failed. Please try again.");
+      }
+    }
   };
 
   return (

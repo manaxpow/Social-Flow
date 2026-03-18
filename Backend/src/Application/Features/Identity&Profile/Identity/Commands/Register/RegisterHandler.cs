@@ -16,17 +16,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
 
     public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        var user = new User
-        {
-            UserName = request.Email,
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            AvatarUrl = request.AvatarUrl,
-            Bio = request.Bio,
-            DateOfBirth = request.DateOfBirth,
-            Gender = request.Gender
-        };
+        var user = new User(
+            request.Email,
+            request.FirstName,
+            request.LastName,
+            request.DateOfBirth,
+            request.Gender,
+            request.AvatarUrl,
+            request.Bio);
         var result = await _userManager.CreateAsync(user, request.Password);
 
         if (!result.Succeeded)

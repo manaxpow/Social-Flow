@@ -9,6 +9,9 @@ public class FriendshipConfiguration : IEntityTypeConfiguration<Friendship>
 
         builder.HasIndex(f => f.UserId2);
 
+        builder.Property(f => f.Status)
+        .IsRequired();
+
         builder.HasOne(f => f.User1)
         .WithMany()
         .HasForeignKey(f => f.UserId1)

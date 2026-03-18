@@ -1,0 +1,1 @@
+public record FeatureNameQuery : IRequest<Result<FeatureNameResponse>>;

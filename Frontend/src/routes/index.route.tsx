@@ -1,29 +1,39 @@
+// src/routes/router.tsx
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "../layout/main.layout";
 import ClientLayout from "../layout/client/client.layout";
+import PublicLayout from "@/layout/client/public.layout";
+import { AuthProvider } from "../providers/auth.provider";
+
+// Import your route arrays
 import { authRoutes } from "./auth.route";
 import { publicRoutes } from "./public.route";
-import { AuthProvider } from "../providers/auth.provider";
+import { clientRoutes } from "./client.route";
 import { socialRoutes } from "./social.route";
+import { RootConditionalRenderer } from "@/layout/client/root.condition-render";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <AuthProvider>
+        <MainLayout />
+      </AuthProvider>
+    ),
     children: [
       {
-        element: <ClientLayout />,
+        index: true,
+        element: <RootConditionalRenderer />,
+      },
+
+      {
+        element: <PublicLayout />,
         children: [...publicRoutes, ...authRoutes],
       },
 
       {
-        element: <AuthProvider />,
-        children: [
-          {
-            element: <ClientLayout />,
-            children: socialRoutes,
-          },
-        ],
+        element: <ClientLayout />,
+        children: [...socialRoutes, ...clientRoutes],
       },
     ],
   },

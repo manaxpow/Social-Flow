@@ -5,7 +5,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 {
     public UserRepository(ApplicationDbContext context) : base(context)
     {
-
     }
 
     public Task<User?> GetByRefreshTokenAsync(string refreshToken)
@@ -22,8 +21,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         var user = await _dbSet.FindAsync(userId);
         if (user is not null)
         {
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = expiryDate;
+            user.UpdateRefreshToken(refreshToken, expiryDate);
         }
     }
 }

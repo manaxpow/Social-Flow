@@ -12,9 +12,9 @@ public static class CookiesHelper
         };
 
         if (expireTime.HasValue)
-            option.Expires = DateTime.Now.AddMinutes(expireTime.Value);
+            option.Expires = DateTime.UtcNow.AddMinutes(expireTime.Value);
         else
-            option.Expires = DateTime.Now.AddMilliseconds(10);
+            option.Expires = DateTime.UtcNow.AddMilliseconds(10);
 
         response.Cookies.Append(key, value, option);
     }

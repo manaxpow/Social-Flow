@@ -1,3 +1,5 @@
+import type { UserResponse } from "@/services/user/dtos/user.reponse";
+
 export interface LoginResponse {
-  id: string;
+  user: UserResponse;
 }

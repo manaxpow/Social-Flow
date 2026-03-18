@@ -1,18 +1,18 @@
-import { Outlet } from "react-router-dom";
+import type { ReactNode } from "react";
 import { Header } from "./header/header";
 import { Footer } from "./footer";
 
-const ClientLayout = () => {
+interface ClientLayoutProps {
+  children: ReactNode;
+}
+
+// Update the component to accept props
+export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <Header />
-
-      <main className="flex-1 min-h-[calc(100vh-4rem-8rem)] pt-4 pb-8">
-        <Outlet />
-      </main>
-
+      <main className="flex-1 container mx-auto py-6">{children}</main>
       <Footer />
     </div>
   );
-};
-export default ClientLayout;
+}

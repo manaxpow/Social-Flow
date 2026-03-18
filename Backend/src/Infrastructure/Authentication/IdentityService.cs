@@ -27,7 +27,7 @@ public class IdentityService : IIdentityService
         if (user == null)
         {
             _logger.LogWarning("Xác thực thất bại: Email {Email} không tồn tại.", email);
-            return Result<User>.Failure(DomainErrors.Auth.InvalidCredentials);
+            return Result<User>.Failure(AuthErrors.InvalidCredentials);
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
@@ -40,7 +40,7 @@ public class IdentityService : IIdentityService
             _jobService.Enqueue<IEmailService>(emailService =>
                 emailService.SendLockoutEmailAsync(user.Email!, user.UserName!, Guid.NewGuid().ToString()));
 
-            return Result<User>.Failure(DomainErrors.Auth.Locked);
+            return Result<User>.Failure(AuthErrors.Locked);
         }
 
         if (!result.Succeeded)
@@ -53,10 +53,10 @@ public class IdentityService : IIdentityService
             if (remainingAttempts <= 3)
             {
                 _logger.LogWarning("Tài khoản sẽ bị khóa: {Email}. sau {RemainingAttempts} lần.", email, remainingAttempts);
-                return Result<User>.Failure(DomainErrors.Auth.InvalidCredentials, new { RemainingAttempts = remainingAttempts });
+                return Result<User>.Failure(AuthErrors.InvalidCredentials, new { RemainingAttempts = remainingAttempts });
             }
 
-            return Result<User>.Failure(DomainErrors.Auth.InvalidCredentials);
+            return Result<User>.Failure(AuthErrors.InvalidCredentials);
         }
 
         _logger.LogInformation("Người dùng {Email} đăng nhập thành công.", email);

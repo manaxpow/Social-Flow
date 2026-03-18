@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   // Use environment variables for flexibility
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/api",
   timeout: 10000, // 10 seconds
   withCredentials: true, // Include cookies in requests
   headers: {
@@ -27,7 +27,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error); // Trả về đối tượng error gốc
-  }
+  },
 );
 
 export default api;

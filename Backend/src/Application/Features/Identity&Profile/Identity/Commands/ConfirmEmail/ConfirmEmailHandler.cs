@@ -15,7 +15,7 @@ public class ConfirmEmailHandler : IRequestHandler<ConfirmEmailCommand, Result<U
         var user = await _userManager.FindByIdAsync(request.UserId);
         if (user == null)
         {
-            return Result<Unit>.Failure(DomainErrors.User.NotFound);
+            return Result<Unit>.Failure(UserErrors.NotFound);
         }
 
         var decodedToken = Uri.UnescapeDataString(request.Token);
@@ -24,7 +24,7 @@ public class ConfirmEmailHandler : IRequestHandler<ConfirmEmailCommand, Result<U
 
         if (!result.Succeeded)
         {
-            return Result<Unit>.Failure(DomainErrors.Auth.InvalidToken);
+            return Result<Unit>.Failure(AuthErrors.InvalidToken);
         }
 
         return Result<Unit>.Success(Unit.Value);

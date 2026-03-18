@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
-import HomePage from "../pages/client/home.page";
+import { LoginPage } from "@/pages/auth/login.page";
 
 export const socialRoutes: RouteObject[] = [
-  { index: true, element: <HomePage /> },
+  { index: true, element: <LoginPage /> },
 ];

@@ -5,6 +5,10 @@ using Hangfire;
 using Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
+using Serilog.Events;
+using SocialFlow.Domain.Exceptions;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +29,7 @@ try
     builder.Services.AddInfrastructureServices(builder.Configuration);
     builder.Services.AddApplicationServices();
 
+    builder.Services.AddSignalR();
     // Add cors
 
     var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
@@ -77,6 +82,17 @@ try
 
     var app = builder.Build();
 
+    // Use Serilog request logging 
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.GetLevel = (httpContext, elapsed, ex) =>
+        {
+            if (httpContext.Response.StatusCode < 500 || ex is ValidationException)
+                return LogEventLevel.Information;
+
+            return LogEventLevel.Error;
+        };
+    });
     app.UseCors("SocialFlowCorsPolicy");
     // Use global exception handling middleware
     app.UseMiddleware<CorrelationIdMiddleware>();
@@ -86,9 +102,14 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
+        app.UseSwagger(); // Tạo file swagger.json
+        app.UseSwaggerUI(options =>
+        {
+            // Phải khớp với tên "v1" bạn đặt trong Extension
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialFlow API v1");
+            options.RoutePrefix = "swagger"; // Mở bằng URL: localhost:port/swagger
+        });
     }
-    // Use Serilog request logging 
-    app.UseSerilogRequestLogging();
 
 
     app.UseHttpsRedirection();
@@ -100,7 +121,15 @@ try
     {
 
     });
+
+    // Add SignalR
+    app.MapHub<NotificationHub>("/hubs/notifications");
+
+    // Cron job
+    app.Services.UseBackgroundJobs();
+
     app.Run();
+
 
 }
 catch (Exception ex)
@@ -111,3 +140,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program { }

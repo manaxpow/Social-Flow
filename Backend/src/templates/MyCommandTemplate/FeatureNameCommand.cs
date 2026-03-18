@@ -1,2 +1,2 @@
 
-public record FeatureNameCommand : IRequest<ApiResponse<FeatureNameResponse>>;
+public record FeatureNameCommand : IRequest<Result<FeatureNameResponse>>;

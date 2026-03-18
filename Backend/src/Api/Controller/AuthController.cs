@@ -19,7 +19,7 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
 
             var resultWithoutToken = Result<LoginResponse>.Success(new LoginResponse
             {
-                Id = result.Value.Id,
+                User = result.Value.User,
                 AccessToken = string.Empty,
                 RefreshToken = string.Empty
             });
@@ -49,7 +49,7 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
         var refreshToken = CookiesHelper.GetCookie(Request, "refreshToken");
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return HandleResult(Result<LoginResponse>.Failure(DomainErrors.Auth.InvalidToken));
+            return HandleResult(Result<LoginResponse>.Failure(AuthErrors.InvalidToken));
         }
 
         var command = new RefreshTokenCommand(refreshToken);
@@ -61,7 +61,6 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
 
             var resultWithoutToken = Result<LoginResponse>.Success(new LoginResponse
             {
-                Id = result.Value!.Id,
                 AccessToken = string.Empty,
                 RefreshToken = string.Empty
             });

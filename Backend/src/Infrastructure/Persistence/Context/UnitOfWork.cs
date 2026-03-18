@@ -9,8 +9,13 @@ public class UnitOfWork(ApplicationDbContext context, IServiceProvider servicePr
 
     // Repositories
     public IUserRepository Users => serviceProvider.GetRequiredService<IUserRepository>();
-
-
+    public IPostRepository Posts => serviceProvider.GetRequiredService<IPostRepository>();
+    public ICommentRepository Comments => serviceProvider.GetRequiredService<ICommentRepository>();
+    public IReactionRepository Reactions => serviceProvider.GetRequiredService<IReactionRepository>();
+    public IFriendshipRepository Friendships => serviceProvider.GetRequiredService<IFriendshipRepository>();
+    public INotificationRepository Notifications => serviceProvider.GetRequiredService<INotificationRepository>();
+    public IMentionRepository Mentions => serviceProvider.GetRequiredService<IMentionRepository>();
+    public IOutboxRepository OutboxMessages => serviceProvider.GetRequiredService<IOutboxRepository>();
     // Generic repository
     public IGenericRepository<T> Repository<T>() where T : class
     {
