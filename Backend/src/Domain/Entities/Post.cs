@@ -1,10 +1,11 @@
 using SocialFlow.Domain.Events;
 
-public class Post : BaseEntity
+public class Post : AggregateRoot
 {
     public Guid AuthorId { get; private set; }
     public User Author { get; private set; } = null!;
     public string? Content { get; private set; } = string.Empty;
+    public string? MediaUrl { get; private set; }
     public int ReactionCount { get; private set; } = 0;
     public int CommentCount { get; private set; } = 0;
     public Guid? SharedPostId { get; private set; }
@@ -16,8 +17,6 @@ public class Post : BaseEntity
     public virtual ICollection<Mention> Mentions { get; private set; } = new List<Mention>();
     public virtual ICollection<Post> Shares { get; private set; } = new List<Post>();
 
-    public virtual ICollection<CloudImage> Images { get; private set; } = new List<CloudImage>();
-
     public virtual ICollection<Comment> Comments
     { get; set; } = new List<Comment>();
 
@@ -25,11 +24,12 @@ public class Post : BaseEntity
     {
     }
 
-    public Post(Guid id, string content, Guid authorId, Guid? sharedPostId, List<Guid> mentionedUserIds)
+    public Post(Guid id, string content, Guid authorId, string? mediaUrl, Guid? sharedPostId, List<Guid> mentionedUserIds)
     {
         Id = id;
         Content = content;
         AuthorId = authorId;
+        MediaUrl = mediaUrl;
         SharedPostId = sharedPostId;
         CreatedAt = DateTime.UtcNow;
 
@@ -50,27 +50,12 @@ public class Post : BaseEntity
         }
     }
 
-    public void UpdateMentions(IEnumerable<Mention> newMentions)
+    public void UpdateMediaUrl(string? newMediaUrl)
     {
-        Mentions.Clear();
-        foreach (var mention in newMentions)
+        if (MediaUrl != newMediaUrl)
         {
-            Mentions.Add(mention);
+            MediaUrl = newMediaUrl;
+            UpdatedAt = DateTime.UtcNow;
         }
-    }
-
-    public void AddImages(IEnumerable<CloudImage> newImages)
-    {
-        foreach (var img in newImages)
-        {
-            Images.Add(img);
-        }
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void ClearImages()
-    {
-        Images.Clear();
-        UpdatedAt = DateTime.UtcNow;
     }
 }

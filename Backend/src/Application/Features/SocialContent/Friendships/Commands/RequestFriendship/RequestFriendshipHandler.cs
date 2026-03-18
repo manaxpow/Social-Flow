@@ -26,22 +26,14 @@ public class RequestFriendshipHandler : IRequestHandler<RequestFriendshipCommand
         if (userReceive is null) return Result<Unit>.Failure(UserErrors.NotFound);
 
         var friendship = new Friendship(
-            userReceive.Id,
             userSend.Value,
+            userReceive.Id,
             userSend.Value,
             sender.FirstName + " " + sender.LastName,
-            sender.Avatar?.Url ?? string.Empty,
+            sender.AvatarUrl ?? string.Empty,
             FriendshipStatus.Pending);
 
-        var notification = new Notification(
-            userSend.Value,
-            userReceive.Id,
-            "Friend request",
-            NotificationType.FriendRequestReceived);
-
         await _unitOfWork.Friendships.AddAsync(friendship);
-        await _unitOfWork.Notifications.AddAsync(notification);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<Unit>.Success(Unit.Value);
     }

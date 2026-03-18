@@ -20,31 +20,4 @@ export const userService = {
       return handleApiError(error);
     }
   },
-
-  updateAvatar: async (avatar: File): Promise<ApiResponse<UserResponse>> => {
-    try {
-      const formData = new FormData();
-      // 'file' là key mà Backend (ASP.NET IFormFile) sẽ hứng
-      formData.append("avatar", avatar);
-
-      const response = await api.put<UserResponse>(
-        `${USER_PATH}/avatar`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
-
-      return {
-        isSuccess: true,
-        data: response.data,
-        error: null,
-        status: response.status,
-      };
-    } catch (error: unknown) {
-      return handleApiError(error);
-    }
-  },
 };

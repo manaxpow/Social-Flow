@@ -19,7 +19,7 @@ public class BlockUserHandler : IRequestHandler<BlockUserCommand, Result<Unit>>
         var userReceive = await _unitOfWork.Users.GetByIdAsync(request.BlockedUserId);
         if (userReceive is null) return Result<Unit>.Failure(UserErrors.NotFound);
 
-        var friendship = await _unitOfWork.Friendships.GetByUsersAsync(userReceive.Id, userSend.Value);
+        var friendship = await _unitOfWork.Friendships.GetRelationBetweenUsersAsync(userReceive.Id, userSend.Value);
         if (friendship is null)
         {
             var newFriendship = new Friendship(
@@ -27,8 +27,8 @@ public class BlockUserHandler : IRequestHandler<BlockUserCommand, Result<Unit>>
             userReceive.Id,
             userSend.Value,
             FriendshipStatus.None);
-            newFriendship.UpdateBlock(userSend.Value, true);
 
+            newFriendship.UpdateBlock(userSend.Value, true);
             await _unitOfWork.Friendships.AddAsync(newFriendship);
         }
         else

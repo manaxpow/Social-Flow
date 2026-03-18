@@ -1,4 +1,4 @@
-public class Mention : BaseEntity
+public class Mention : Entity
 {
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;

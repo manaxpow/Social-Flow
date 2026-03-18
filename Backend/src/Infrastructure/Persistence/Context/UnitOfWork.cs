@@ -15,8 +15,7 @@ public class UnitOfWork(ApplicationDbContext context, IServiceProvider servicePr
     public IFriendshipRepository Friendships => serviceProvider.GetRequiredService<IFriendshipRepository>();
     public INotificationRepository Notifications => serviceProvider.GetRequiredService<INotificationRepository>();
     public IMentionRepository Mentions => serviceProvider.GetRequiredService<IMentionRepository>();
-
-
+    public IOutboxRepository OutboxMessages => serviceProvider.GetRequiredService<IOutboxRepository>();
     // Generic repository
     public IGenericRepository<T> Repository<T>() where T : class
     {

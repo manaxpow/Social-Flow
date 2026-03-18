@@ -2,28 +2,26 @@ using FluentValidation;
 
 public class CreatePostValidator : AbstractValidator<CreatePostCommand>
 {
-    private const int MaxImageCount = 4;
-
     public CreatePostValidator()
     {
         RuleFor(x => x)
             .Must(x => !string.IsNullOrWhiteSpace(x.Content) ||
-                       (x.Files != null && x.Files.Any()) ||
+                       !string.IsNullOrWhiteSpace(x.MediaUrl) ||
                        x.SharedPostId.HasValue)
-            .WithMessage("Một bài viết phải có nội dung, ảnh hoặc là bài chia sẻ.");
+            .WithMessage("A post must have content, media, or be a shared post.")
+            .WithName("Post");
+
+        RuleFor(x => x.MediaUrl)
+            .MaximumLength(500)
+            .WithMessage("Media URL must be less than 500 characters")
+            .When(x => !string.IsNullOrEmpty(x.MediaUrl));
 
         RuleFor(x => x.Content)
-            .MaximumLength(2000);
-
-        RuleFor(x => x.Files)
-            .Must(files => files == null || files.Count <= MaxImageCount)
-            .WithMessage($"Bạn chỉ có thể đăng tối đa {MaxImageCount} ảnh.");
-
-        RuleForEach(x => x.Files)
-            .SetValidator(new FileValidator());
+            .MaximumLength(2000)
+            .WithMessage("Content cannot exceed 2000 characters");
 
         RuleFor(x => x.MentionedUserIds)
-            .Must(ids => ids == null || ids.Distinct().Count() == ids.Count)
-            .WithMessage("Danh sách nhắc tên không được có ID trùng lặp.");
+            .Must(ids => ids.Distinct().Count() == ids.Count)
+            .WithMessage("Duplicate mentions are not allowed.");
     }
 }

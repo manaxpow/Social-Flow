@@ -7,5 +7,6 @@ public record RegisterCommand(
     Gender Gender,
     string FirstName,
     string LastName,
+    string? AvatarUrl,
     string? Bio
 ) : IRequest<Result<RegisterResponse>>;

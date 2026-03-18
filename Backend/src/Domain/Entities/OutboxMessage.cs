@@ -1,4 +1,4 @@
-public class OutboxMessage : BaseEntity
+public class OutboxMessage : Entity
 {
     public string Type { get; private set; } = string.Empty;
     public string Content { get; private set; } = string.Empty;
@@ -28,7 +28,7 @@ public class OutboxMessage : BaseEntity
 
     public void MarkAsProcessed(DateTime processedAt, string? error = null, int attemptCount = 0, DateTime? lastAttemptAt = null)
     {
-        ProcessedAt = processedAt;
+        ProcessedAt = processedAt.Kind == DateTimeKind.Utc ? processedAt : processedAt.ToUniversalTime();
         Error = error;
         AttemptCount = attemptCount;
         LastAttemptAt = lastAttemptAt;

@@ -22,6 +22,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
             request.LastName,
             request.DateOfBirth,
             request.Gender,
+            request.AvatarUrl,
             request.Bio);
         var result = await _userManager.CreateAsync(user, request.Password);
 

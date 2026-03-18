@@ -1,4 +1,4 @@
-public class Reaction : BaseEntity
+public class Reaction : AggregateRoot
 {
     public Guid TargetId { get; private set; }
     public TargetType TargetType { get; private set; }

@@ -23,7 +23,7 @@ public static class HangfireConfiguration
 
         services.AddHangfireServer();
 
-        services.AddScoped<ProcessOutboxMessagesJob>();
+        services.AddScoped<IOutboxProcessor, ProcessOutboxMessagesJob>();
 
         return services;
     }
@@ -32,7 +32,7 @@ public static class HangfireConfiguration
     {
         var recurringJobManager = services.GetRequiredService<IRecurringJobManager>();
 
-        recurringJobManager.AddOrUpdate<ProcessOutboxMessagesJob>(
+        recurringJobManager.AddOrUpdate<IOutboxProcessor>(
             "outbox-processor",
             job => job.Process(),
             "*/10 * * * * *" // Cron: 10 giây một lần

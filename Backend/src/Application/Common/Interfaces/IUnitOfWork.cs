@@ -6,6 +6,7 @@ public interface IUnitOfWork : IDisposable
     IReactionRepository Reactions { get; }
     IFriendshipRepository Friendships { get; }
     INotificationRepository Notifications { get; }
+    IOutboxRepository OutboxMessages { get; }
 
     IGenericRepository<T> Repository<T>() where T : class;
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

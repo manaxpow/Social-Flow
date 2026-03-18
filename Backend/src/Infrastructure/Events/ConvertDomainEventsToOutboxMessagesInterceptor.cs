@@ -12,7 +12,7 @@ public class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChangesInterce
         if (dbContext is null) return base.SavingChangesAsync(eventData, result, ct);
 
         var outboxMessages = dbContext.ChangeTracker
-            .Entries<BaseEntity>()
+            .Entries<AggregateRoot>()
             .Select(x => x.Entity)
             .SelectMany(entity =>
             {

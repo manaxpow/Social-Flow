@@ -26,15 +26,8 @@ public class AcceptFriendshipHandler : IRequestHandler<AcceptFriendshipCommand, 
         friendship.AcceptRequest(
             acceptedUserId.Value,
             accepter.FirstName + " " + accepter.LastName,
-            accepter.Avatar?.Url ?? string.Empty);
+            accepter.AvatarUrl ?? string.Empty);
 
-        var notification = new Notification(
-            acceptedUserId.Value,
-            request.FriendId,
-            "Friend request accepted",
-            NotificationType.FriendRequestAccepted);
-
-        await _unitOfWork.Notifications.AddAsync(notification);
         await _unitOfWork.SaveChangesAsync();
         return Result<Unit>.Success(Unit.Value);
     }

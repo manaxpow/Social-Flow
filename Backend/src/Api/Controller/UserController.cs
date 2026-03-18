@@ -11,13 +11,4 @@ public class UserController(IMediator _mediator) : BaseApiController(_mediator)
         var result = await _mediator.Send(new GetMeQuery());
         return HandleResult(result);
     }
-
-    [HttpPut("avatar")]
-    public async Task<IActionResult> UpdateAvatar([FromForm] UpdateAvatarCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return HandleResult(result);
-    }
-
-
 }

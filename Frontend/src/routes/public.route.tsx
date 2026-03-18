@@ -4,6 +4,6 @@ import { RegisterPage } from "../pages/auth/register.page";
 
 export const publicRoutes: RouteObject[] = [
   { index: true, element: <LoginPage /> },
-  { path: "login", element: <LoginPage /> },
-  { path: "register", element: <RegisterPage /> },
+  { path: "about", element: <LoginPage /> },
+  { path: "policy", element: <RegisterPage /> },
 ];

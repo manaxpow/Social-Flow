@@ -1,4 +1,4 @@
-public class Comment : BaseEntity
+public class Comment : AggregateRoot
 {
     public Guid PostId { get; private set; }
     public Guid AuthorId { get; private set; }
@@ -10,7 +10,6 @@ public class Comment : BaseEntity
     public Comment? ParentComment { get; set; } = null!;
 
     public virtual ICollection<Mention> Mentions { get; set; } = new List<Mention>();
-    public virtual ICollection<CloudImage> Images { get; private set; } = new List<CloudImage>();
 
     public Comment() { }
 
@@ -22,34 +21,5 @@ public class Comment : BaseEntity
         Content = content;
 
         AddDomainEvent(new CommentCreatedEvent(Id, PostId, AuthorId));
-    }
-
-    public void UpdateContent(string newContent)
-    {
-        if (string.IsNullOrWhiteSpace(newContent))
-        {
-            throw new ArgumentException("Nội dung bình luận không được để trống.");
-        }
-
-        if (Content != newContent)
-        {
-            Content = newContent;
-            UpdatedAt = DateTime.UtcNow;
-        }
-    }
-
-    public void AddImages(IEnumerable<CloudImage> newImages)
-    {
-        foreach (var img in newImages)
-        {
-            Images.Add(img);
-        }
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void ClearImages()
-    {
-        Images.Clear();
-        UpdatedAt = DateTime.UtcNow;
     }
 }

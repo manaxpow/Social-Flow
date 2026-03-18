@@ -9,19 +9,5 @@ public class ConversationMemberConfiguration : IEntityTypeConfiguration<Conversa
 
         builder.Property(cm => cm.Nickname)
             .IsRequired();
-
-        builder.OwnsOne(u => u.Avatar, a =>
-        {
-            // Ánh xạ thuộc tính Url của CloudImage thành cột AvatarUrl trong bảng Users
-            a.Property(p => p.Url)
-                .HasColumnName("AvatarUrl")
-                .HasMaxLength(500);
-
-            // Ánh xạ thuộc tính PublicId thành cột AvatarPublicId
-            a.Property(p => p.PublicId)
-                .HasColumnName("AvatarPublicId")
-                .HasMaxLength(200);
-        });
-
     }
 }

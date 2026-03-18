@@ -1,4 +1,4 @@
-public class Notification : BaseEntity
+public class Notification : Entity
 {
     public Guid? SenderId { get; private set; }
     public User? Sender { get; private set; }

@@ -8,6 +8,8 @@ using Serilog;
 using Serilog.Events;
 using SocialFlow.Domain.Exceptions;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
@@ -76,11 +78,9 @@ try
 
     // Add swagger
     builder.Services.AddOpenApi();
-
     builder.Services.AddSwaggerDocumentaion();
 
     var app = builder.Build();
-    app.UseCors("SocialFlowCorsPolicy");
 
     // Use Serilog request logging 
     app.UseSerilogRequestLogging(options =>
@@ -93,6 +93,7 @@ try
             return LogEventLevel.Error;
         };
     });
+    app.UseCors("SocialFlowCorsPolicy");
     // Use global exception handling middleware
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -101,25 +102,19 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
-
-        app.UseSwagger();
+        app.UseSwagger(); // Tạo file swagger.json
         app.UseSwaggerUI(options =>
         {
+            // Phải khớp với tên "v1" bạn đặt trong Extension
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialFlow API v1");
+            options.RoutePrefix = "swagger"; // Mở bằng URL: localhost:port/swagger
         });
     }
-    else
-    {
-        app.UseHttpsRedirection();
-    }
 
 
+    app.UseHttpsRedirection();
 
     app.UseRateLimiter();
-
-    app.UseAuthentication();
-    app.UseAuthorization();
-
     app.MapControllers();
 
     app.UseHangfireDashboard("/hangfire", new DashboardOptions

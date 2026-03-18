@@ -17,8 +17,7 @@ public static class DependencyInjection
             .AddSettings(configuration)
             .AddCoreInfrastructure()
             .AddBackgroundJobConfiguration(configuration)
-            .AddCaching(configuration)
-            .AddCloudStorage(configuration);
+            .AddCaching(configuration);
 
         return services;
     }

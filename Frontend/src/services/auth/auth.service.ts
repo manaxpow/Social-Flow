@@ -119,8 +119,6 @@ export const authService = {
 
   logout: async (): Promise<void> => {
     await api.post(`${AUTH_PATH}/logout`);
-    if (window.location.pathname !== "/auth/login") {
-      window.location.href = "/auth/login";
-    }
+    window.location.href = "/auth/login";
   },
 };
