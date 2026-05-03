@@ -10,6 +10,7 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         _userManager = userManager;
 
         RuleFor(x => x.Email)
+        .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Email is required.")
             .EmailAddress().WithMessage("A valid email is required.")
             .MustAsync(BeUniqueEmail).WithMessage("Email already in use.");
@@ -31,10 +32,6 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.LastName)
             .NotEmpty().WithMessage("Last name is required.")
             .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters.");
-
-        // Simplified: MaximumLength only triggers if a value is provided
-        RuleFor(x => x.AvatarUrl)
-            .MaximumLength(200).WithMessage("Avatar URL cannot exceed 200 characters.");
 
         RuleFor(x => x.Bio)
             .MaximumLength(500).WithMessage("Bio cannot exceed 500 characters.");

@@ -1,10 +1,13 @@
 export interface UserResponse {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   dateOfBirth: Date;
   gender: string;
   avatarUrl?: string;
   bio?: string;
+  coverUrl?: string;
+  createdAt?: string;
+  followingCount?: number;
+  followersCount?: number;
 }

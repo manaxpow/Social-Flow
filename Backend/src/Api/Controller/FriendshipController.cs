@@ -5,6 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize]
 public class FriendshipController(IMediator mediator) : BaseApiController(mediator)
 {
+    [HttpGet("friends")]
+    public async Task<IActionResult> GetFriends([FromQuery] string? search = null)
+    {
+        var result = await _mediator.Send(new GetFriendsQuery(search));
+        return HandleResult(result);
+    }
+
     [HttpPost("{userId:guid}/request")]
     public async Task<IActionResult> RequestFriendship([FromRoute] Guid userId)
     {

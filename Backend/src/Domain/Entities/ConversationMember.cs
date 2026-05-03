@@ -1,4 +1,4 @@
-public class ConversationMember : Entity
+public sealed class ConversationMember : Entity
 {
     public Guid ConversationId { get; private set; }
     public Guid UserId { get; private set; }

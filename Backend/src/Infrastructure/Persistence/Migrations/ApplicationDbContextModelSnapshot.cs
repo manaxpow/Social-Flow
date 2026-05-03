@@ -16,7 +16,7 @@ namespace Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -25,242 +25,426 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<Guid>("AuthorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("content");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsParentDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_parent_deleted");
 
                     b.Property<Guid?>("ParentCommentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_comment_id");
 
                     b.Property<Guid>("PostId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
+
+                    b.Property<int>("ReactionCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reaction_count");
+
+                    b.Property<int>("ReplyCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reply_count");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_comments");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_comments_author_id");
 
-                    b.HasIndex("ParentCommentId");
+                    b.HasIndex("ParentCommentId")
+                        .HasDatabaseName("ix_comments_parent_comment_id");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("PostId")
+                        .HasDatabaseName("ix_comments_post_id");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("comments", (string)null);
+                });
+
+            modelBuilder.Entity("CommentTree", b =>
+                {
+                    b.Property<Guid>("AncestorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ancestor_id");
+
+                    b.Property<Guid>("DescendantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("descendant_id");
+
+                    b.Property<short>("Depth")
+                        .HasColumnType("smallint")
+                        .HasColumnName("depth");
+
+                    b.HasKey("AncestorId", "DescendantId")
+                        .HasName("pk_comment_trees");
+
+                    b.HasIndex("DescendantId")
+                        .HasDatabaseName("ix_comment_trees_descendant_id");
+
+                    b.ToTable("comment_trees", (string)null);
                 });
 
             modelBuilder.Entity("Conversation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<bool>("IsGroup")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_group");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_conversations");
 
-                    b.ToTable("Conversations", (string)null);
+                    b.ToTable("conversations", (string)null);
                 });
 
             modelBuilder.Entity("ConversationMember", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("avatar_url");
 
                     b.Property<Guid>("ConversationId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("conversation_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<string>("Nickname")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("nickname");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_conversation_members");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_conversation_members_user_id");
 
                     b.HasIndex("ConversationId", "UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_conversation_members_conversation_id_user_id");
 
-                    b.ToTable("ConversationMembers");
+                    b.ToTable("conversation_members", (string)null);
                 });
 
             modelBuilder.Entity("Friendship", b =>
                 {
                     b.Property<Guid>("UserId1")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id1");
 
                     b.Property<Guid>("UserId2")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id2");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
 
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<bool>("IsBlockedByUser1")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_blocked_by_user1");
 
                     b.Property<bool>("IsBlockedByUser2")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_blocked_by_user2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserActionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_action_id");
 
-                    b.HasKey("UserId1", "UserId2");
+                    b.HasKey("UserId1", "UserId2")
+                        .HasName("pk_friendships");
 
-                    b.HasIndex("UserId2");
+                    b.HasIndex("UserId2")
+                        .HasDatabaseName("ix_friendships_user_id2");
 
-                    b.ToTable("Friendships");
+                    b.ToTable("friendships", (string)null);
                 });
 
             modelBuilder.Entity("Mention", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<Guid?>("CommentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<Guid?>("PostId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_mention");
 
-                    b.HasIndex("CommentId");
+                    b.HasIndex("CommentId")
+                        .HasDatabaseName("ix_mention_comment_id");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("PostId")
+                        .HasDatabaseName("ix_mention_post_id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_mention_user_id");
 
-                    b.ToTable("Mention");
+                    b.ToTable("mention", (string)null);
                 });
 
             modelBuilder.Entity("Message", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("content");
 
                     b.Property<Guid>("ConversationId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("conversation_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<Guid>("SenderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("sender_id");
 
                     b.Property<int>("Type")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_messages");
 
-                    b.HasIndex("ConversationId");
+                    b.HasIndex("ConversationId")
+                        .HasDatabaseName("ix_messages_conversation_id");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId")
+                        .HasDatabaseName("ix_messages_sender_id");
 
-                    b.ToTable("Messages");
+                    b.ToTable("messages", (string)null);
                 });
 
             modelBuilder.Entity("MessageReceipt", b =>
                 {
                     b.Property<Guid>("MessageId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_read");
 
                     b.Property<DateTime>("ReadAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("read_at");
 
-                    b.HasKey("MessageId", "UserId");
+                    b.HasKey("MessageId", "UserId")
+                        .HasName("pk_message_receipts");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_message_receipts_user_id");
 
-                    b.ToTable("MessageReceipts");
+                    b.ToTable("message_receipts", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text")
+                        .HasColumnName("concurrency_stamp");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("text")
+                        .HasColumnName("normalized_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_roles");
+
+                    b.ToTable("roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("concurrency_stamp");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_roles");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -273,374 +457,551 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_type");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_value");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_role_claims");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_role_claims_role_id");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("role_claims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_type");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_value");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_user_claims");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_claims_user_id");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("user_claims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("login_provider");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("provider_key");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("provider_display_name");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("LoginProvider", "ProviderKey");
+                    b.HasKey("LoginProvider", "ProviderKey")
+                        .HasName("pk_user_logins");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_logins_user_id");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("user_logins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.HasKey("UserId", "RoleId")
+                        .HasName("pk_user_roles");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_user_roles_role_id");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("user_roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("login_provider");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<string>("Value")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("value");
 
-                    b.HasKey("UserId", "LoginProvider", "Name");
+                    b.HasKey("UserId", "LoginProvider", "Name")
+                        .HasName("pk_user_tokens");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("user_tokens", (string)null);
                 });
 
             modelBuilder.Entity("Notification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_read");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("message");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("read_at");
 
                     b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("receiver_id");
 
                     b.Property<Guid?>("SenderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("sender_id");
 
                     b.Property<Guid?>("TargetId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
 
                     b.Property<int?>("TargetType")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("target_type");
 
                     b.Property<int>("Type")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_notifications");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId")
+                        .HasDatabaseName("ix_notifications_sender_id");
 
-                    b.HasIndex("ReceiverId", "CreatedAt");
+                    b.HasIndex("ReceiverId", "CreatedAt")
+                        .HasDatabaseName("ix_notifications_receiver_id_created_at");
 
-                    b.HasIndex("ReceiverId", "IsRead");
+                    b.HasIndex("ReceiverId", "IsRead")
+                        .HasDatabaseName("ix_notifications_receiver_id_is_read");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("notifications", (string)null);
                 });
 
             modelBuilder.Entity("OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<int>("AttemptCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("content");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
 
                     b.Property<string>("Error")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("error");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<DateTime?>("LastAttemptAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("last_attempt_at");
 
                     b.Property<DateTime>("OccurredAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("occurred_at");
 
                     b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("processed_at");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("type");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_messages");
 
                     b.HasIndex("ProcessedAt")
-                        .HasFilter("\"ProcessedAt\" IS NULL");
+                        .HasDatabaseName("ix_outbox_messages_processed_at")
+                        .HasFilter("\"processed_at\" IS NULL");
 
-                    b.ToTable("OutboxMessages", (string)null);
+                    b.ToTable("outbox_messages", (string)null);
                 });
 
             modelBuilder.Entity("Post", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<Guid>("AuthorId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
 
                     b.Property<int>("CommentCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("comment_count");
 
                     b.Property<string>("Content")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("content");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
 
-                    b.Property<string>("MediaUrl")
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<int>("ReactionCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("reaction_count");
+
+                    b.Property<int>("ShareCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("share_count");
 
                     b.Property<Guid?>("SharedPostId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("shared_post_id");
 
-                    b.PrimitiveCollection<string>("TopReactTypes")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_posts");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_posts_author_id");
 
-                    b.HasIndex("SharedPostId");
+                    b.HasIndex("SharedPostId")
+                        .HasDatabaseName("ix_posts_shared_post_id");
 
-                    b.ToTable("Posts");
+                    b.ToTable("posts", (string)null);
+                });
+
+            modelBuilder.Entity("PostMedia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_post_media");
+
+                    b.HasIndex("PostId")
+                        .HasDatabaseName("ix_post_media_post_id");
+
+                    b.ToTable("post_media", (string)null);
                 });
 
             modelBuilder.Entity("Reaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
 
                     b.Property<int>("ReactType")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("react_type");
 
                     b.Property<Guid>("TargetId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_id");
 
                     b.Property<int>("TargetType")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("target_type");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_reactions");
 
-                    b.HasIndex("TargetId", "TargetType");
+                    b.HasIndex("TargetId", "TargetType")
+                        .HasDatabaseName("ix_reactions_target_id_target_type");
 
                     b.HasIndex("UserId", "TargetId", "TargetType")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_reactions_user_id_target_id_target_type");
 
-                    b.ToTable("Reactions");
+                    b.ToTable("reactions", (string)null);
                 });
 
             modelBuilder.Entity("User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("AvatarUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("integer")
+                        .HasColumnName("access_failed_count");
 
                     b.Property<string>("Bio")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("bio");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("concurrency_stamp");
 
                     b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("date_of_birth");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_confirmed");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
 
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("gender");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<DateTime>("LastLogin")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("last_login");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("lockout_enabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lockout_end");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_email");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_user_name");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("password_hash");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("phone_number_confirmed");
 
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("provider");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("refresh_token");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("refresh_token_expiry_time");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("security_stamp");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("two_factor_enabled");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("user_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_users");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -649,7 +1010,7 @@ namespace Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("Comment", b =>
@@ -658,19 +1019,54 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_users_author_id");
 
                     b.HasOne("Comment", "ParentComment")
                         .WithMany()
-                        .HasForeignKey("ParentCommentId");
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_comments_comments_parent_comment_id");
 
                     b.HasOne("Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_posts_post_id");
+
+                    b.OwnsOne("CloudAsset", "Media", b1 =>
+                        {
+                            b1.Property<Guid>("CommentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("PublicId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("media_public_id");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer")
+                                .HasColumnName("media_type");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("media_url");
+
+                            b1.HasKey("CommentId");
+
+                            b1.ToTable("comments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CommentId")
+                                .HasConstraintName("fk_comments_comments_id");
+                        });
 
                     b.Navigation("Author");
+
+                    b.Navigation("Media");
 
                     b.Navigation("ParentComment");
 
@@ -683,13 +1079,15 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_conversation_members_conversations_conversation_id");
 
                     b.HasOne("User", "User")
                         .WithMany("ConversationMembers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_conversation_members_users_user_id");
 
                     b.Navigation("Conversation");
 
@@ -702,13 +1100,15 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId1")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_friendships_asp_net_users_user_id1");
 
                     b.HasOne("User", "User2")
                         .WithMany()
                         .HasForeignKey("UserId2")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_friendships_asp_net_users_user_id2");
 
                     b.Navigation("User1");
 
@@ -720,18 +1120,21 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("Comment", "Comment")
                         .WithMany("Mentions")
                         .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_mention_comments_comment_id");
 
                     b.HasOne("Post", "Post")
                         .WithMany("Mentions")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_mention_posts_post_id");
 
                     b.HasOne("User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_mention_users_user_id");
 
                     b.Navigation("Comment");
 
@@ -746,13 +1149,15 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_messages_conversations_conversation_id");
 
                     b.HasOne("User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_messages_users_sender_id");
 
                     b.Navigation("Conversation");
 
@@ -765,13 +1170,15 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_message_receipts_messages_message_id");
 
                     b.HasOne("User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_message_receipts_users_user_id");
 
                     b.Navigation("Message");
 
@@ -784,7 +1191,8 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_role_claims_asp_net_roles_role_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
@@ -793,7 +1201,8 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_claims_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
@@ -802,7 +1211,8 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_logins_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
@@ -811,13 +1221,15 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_roles_asp_net_roles_role_id");
 
                     b.HasOne("User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_roles_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -826,7 +1238,8 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_user_tokens_users_user_id");
                 });
 
             modelBuilder.Entity("Notification", b =>
@@ -835,12 +1248,14 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_users_receiver_id");
 
                     b.HasOne("User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_notifications_users_sender_id");
 
                     b.Navigation("Receiver");
 
@@ -852,49 +1267,61 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasOne("User", "Author")
                         .WithMany("Posts")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_posts_users_author_id");
 
                     b.HasOne("Post", "SharedPost")
                         .WithMany("Shares")
-                        .HasForeignKey("SharedPostId");
-
-                    b.OwnsMany("CommentPreview", "TopComments", b1 =>
-                        {
-                            b1.Property<Guid>("PostId");
-
-                            b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAdd();
-
-                            b1.Property<string>("AuthorAvatarUrl");
-
-                            b1.Property<string>("AuthorName")
-                                .IsRequired();
-
-                            b1.Property<string>("Content")
-                                .IsRequired();
-
-                            b1.Property<DateTime>("CreatedAt");
-
-                            b1.Property<Guid>("Id");
-
-                            b1.Property<int>("ReactionCount");
-
-                            b1.HasKey("PostId", "__synthesizedOrdinal");
-
-                            b1.ToTable("Posts");
-
-                            b1.ToJson("TopComments");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PostId");
-                        });
+                        .HasForeignKey("SharedPostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_posts_posts_shared_post_id");
 
                     b.Navigation("Author");
 
                     b.Navigation("SharedPost");
+                });
 
-                    b.Navigation("TopComments");
+            modelBuilder.Entity("PostMedia", b =>
+                {
+                    b.HasOne("Post", null)
+                        .WithMany("MediaItems")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_post_media_posts_post_id");
+
+                    b.OwnsOne("CloudAsset", "Media", b1 =>
+                        {
+                            b1.Property<Guid>("PostMediaId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("PublicId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("public_id");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer")
+                                .HasColumnName("type");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("url");
+
+                            b1.HasKey("PostMediaId");
+
+                            b1.ToTable("post_media");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PostMediaId")
+                                .HasConstraintName("fk_post_media_post_media_id");
+                        });
+
+                    b.Navigation("Media")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Reaction", b =>
@@ -903,9 +1330,75 @@ namespace Infrastructure.Persistence.Migrations
                         .WithMany("Reactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_reactions_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("User", b =>
+                {
+                    b.OwnsOne("CloudAsset", "Avatar", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("PublicId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("avatar_public_id");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer")
+                                .HasColumnName("avatar_type");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("avatar_url");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("users");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_asp_net_users_asp_net_users_id");
+                        });
+
+                    b.OwnsOne("CloudAsset", "Cover", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("PublicId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("cover_public_id");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("integer")
+                                .HasColumnName("cover_type");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("cover_url");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("users");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_asp_net_users_asp_net_users_id");
+                        });
+
+                    b.Navigation("Avatar");
+
+                    b.Navigation("Cover");
                 });
 
             modelBuilder.Entity("Comment", b =>
@@ -916,6 +1409,8 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Post", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("MediaItems");
 
                     b.Navigation("Mentions");
 

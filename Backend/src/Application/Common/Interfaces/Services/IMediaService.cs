@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 public interface IMediaService
 {
-    Task<MediaUploadResult> UploadImageAsync(IFormFile file, string folder);
-    Task DeleteImageAsync(string publicId);
+    Task<MediaUploadResult> UploadAssetAsync(IFormFile file, string folder);
+    Task DeleteAssetAsync(string publicId, MediaType type);
+    SetupUploadResponse GenerateSignature(string folder);
 }

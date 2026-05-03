@@ -1,4 +1,5 @@
 using System.Collections;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SocialFlow.Infrastructure.Persistence.Repositories;
 
@@ -6,6 +7,8 @@ public class UnitOfWork(ApplicationDbContext context, IServiceProvider servicePr
 {
     private readonly ApplicationDbContext _context = context;
     private readonly IServiceProvider serviceProvider = serviceProvider;
+
+    public DbContext Context => _context;
 
     // Repositories
     public IUserRepository Users => serviceProvider.GetRequiredService<IUserRepository>();

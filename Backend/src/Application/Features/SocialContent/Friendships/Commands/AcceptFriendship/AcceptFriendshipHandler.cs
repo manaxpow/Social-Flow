@@ -26,7 +26,7 @@ public class AcceptFriendshipHandler : IRequestHandler<AcceptFriendshipCommand, 
         friendship.AcceptRequest(
             acceptedUserId.Value,
             accepter.FirstName + " " + accepter.LastName,
-            accepter.AvatarUrl ?? string.Empty);
+            accepter.Avatar?.Url ?? string.Empty);
 
         await _unitOfWork.SaveChangesAsync();
         return Result<Unit>.Success(Unit.Value);

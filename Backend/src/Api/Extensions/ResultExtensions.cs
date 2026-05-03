@@ -7,10 +7,10 @@ public static class ResultExtensions
         return result.Error.Code switch
         {
             // Unauthorized (401)
-            "Auth.InvalidCredentials" or "Auth.TokenExpired" => StatusCodes.Status401Unauthorized,
+            "Auth.InvalidCredentials" or "Auth.TokenExpired" or "Auth.Unauthorized" => StatusCodes.Status401Unauthorized,
 
             // Forbidden (403)
-            "Auth.Locked" or "Post.NoPermission" => StatusCodes.Status403Forbidden,
+            "Auth.Forbidden" => StatusCodes.Status403Forbidden,
 
             // Not Found (404)
             var code when code.EndsWith(".NotFound") => StatusCodes.Status404NotFound,

@@ -1,4 +1,4 @@
-public class MessageReceipt
+public sealed class MessageReceipt
 {
     public Guid MessageId { get; private set; }
     public Message Message { get; private set; } = null!;

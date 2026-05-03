@@ -13,6 +13,7 @@ public static class QueryableExtensions
         var count = await source.CountAsync(cancellationToken);
 
         var items = await source
+            .OrderBy(x => x)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

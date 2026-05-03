@@ -1,28 +1,41 @@
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 public class UpdatePostHandler : IRequestHandler<UpdatePostCommand, Result<PostResponse>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IAuthorizationService _authorizationService;
 
-    public UpdatePostHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+    public UpdatePostHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService, IAuthorizationService authorizationService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _currentUserService = currentUserService;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result<PostResponse>> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
-        var post = await _unitOfWork.Posts.GetByIdAsync(request.Id);
+        var post = await _unitOfWork.Posts.GetByIdWithMediaAsync(request.Id);
         if (post is null) return Result<PostResponse>.Failure(PostErrors.NotFound);
 
-        if (post.AuthorId != _currentUserService.UserId) return Result<PostResponse>.Failure(AuthErrors.Unauthorized);
+        var authorizationResult = await _authorizationService.AuthorizeAsync(_currentUserService.User!, post, new IsOwnerRequirement());
+        if (!authorizationResult.Succeeded) return Result<PostResponse>.Failure(AuthErrors.Forbidden);
 
         post.UpdateContent(request.Content ?? post.Content);
-        post.UpdateMediaUrl(request.MediaUrl ?? post.MediaUrl);
+
+        if (request.Media != null)
+        {
+            var incomingAssets = request.Media
+            .Select(m => new CloudAsset(m.Url, m.PublicId, m.Type))
+            .ToList();
+
+            post.UpdateMediaItems(incomingAssets);
+        }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

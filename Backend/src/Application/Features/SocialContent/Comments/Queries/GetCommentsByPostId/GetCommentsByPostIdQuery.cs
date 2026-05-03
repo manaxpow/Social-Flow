@@ -2,6 +2,7 @@ using MediatR;
 
 public record GetCommentsByPostIdQuery(
     Guid PostId,
+    Guid? parentCommentId,
     int PageNumber = 1,
     int PageSize = 10
 ) : IRequest<Result<PagedList<CommentResponse>>>;

@@ -5,7 +5,19 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("Users");
+        builder.OwnsOne(u => u.Avatar, a =>
+        {
+            a.Property(p => p.Url).HasColumnName("avatar_url").IsRequired();
+            a.Property(p => p.PublicId).HasColumnName("avatar_public_id").IsRequired();
+            a.Property(p => p.Type).HasColumnName("avatar_type").IsRequired();
+        });
+
+        builder.OwnsOne(u => u.Cover, a =>
+       {
+           a.Property(p => p.Url).HasColumnName("cover_url").IsRequired();
+           a.Property(p => p.PublicId).HasColumnName("cover_public_id").IsRequired();
+           a.Property(p => p.Type).HasColumnName("cover_type").IsRequired();
+       });
 
         builder.Property(u => u.Email)
             .IsRequired()
@@ -30,5 +42,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion<string>()
             .HasMaxLength(10)
             .IsRequired();
+
+        builder.HasMany(u => u.Posts)
+            .WithOne(p => p.Author)
+            .HasForeignKey(p => p.AuthorId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

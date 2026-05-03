@@ -13,7 +13,6 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
         var result = await _mediator.Send(command);
         if (result.IsSuccess && result.Value != null)
         {
-
             CookiesHelper.AppendCookie(Response, "accessToken", result.Value.AccessToken, 15); // 15 minutes
             CookiesHelper.AppendCookie(Response, "refreshToken", result.Value.RefreshToken, 10080); // 7 days
 
@@ -33,6 +32,7 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterCommand command)
     {
+
         var result = await _mediator.Send(command);
         if (!result.IsSuccess)
         {
@@ -93,6 +93,14 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
     [AllowAnonymous]
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return HandleResult(result);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationCommand command)
     {
         var result = await _mediator.Send(command);
         return HandleResult(result);

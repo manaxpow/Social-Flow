@@ -21,7 +21,6 @@ public class ProcessOutboxMessagesJob : IOutboxProcessor
 
         if (messages == null || !messages.Any())
         {
-            _logger.LogInformation("No outbox messages to process.");
             return;
         }
         foreach (var message in messages)
@@ -46,6 +45,7 @@ public class ProcessOutboxMessagesJob : IOutboxProcessor
             }
             catch (Exception ex)
             {
+                message.IncrementAttemptCount();
                 message.MarkAsFailed(DateTime.UtcNow);
                 message.UpdateError(ex.Message);
                 _logger.LogError(ex, ex.Message);

@@ -35,7 +35,7 @@ public static class HangfireConfiguration
         recurringJobManager.AddOrUpdate<IOutboxProcessor>(
             "outbox-processor",
             job => job.Process(),
-            "*/10 * * * * *" // Cron: 10 giây một lần
+            "*/1 * * * * *" // Cron: 1 giây một lần
         );
     }
 }

@@ -121,4 +121,21 @@ export const authService = {
     await api.post(`${AUTH_PATH}/logout`);
     window.location.href = "/auth/login";
   },
+
+  resendConfirmation: async (email: string): Promise<ApiResponse<null>> => {
+    try {
+      const response = await api.post(`${AUTH_PATH}/resend-confirmation`, {
+        email,
+      });
+
+      return {
+        isSuccess: true,
+        data: response.data,
+        error: null,
+        status: response.status,
+      };
+    } catch (error: unknown) {
+      return handleApiError(error);
+    }
+  },
 };

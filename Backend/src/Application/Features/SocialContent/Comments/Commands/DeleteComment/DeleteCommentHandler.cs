@@ -18,7 +18,7 @@ public class DeleteCommentHandler : IRequestHandler<DeleteCommentCommand, Result
 
         if (comment.AuthorId != _currentUserService.UserId) return Result<Unit>.Failure(AuthErrors.Unauthorized);
 
-        _unitOfWork.Comments.Delete(comment);
+        comment.Delete();
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<Unit>.Success(Unit.Value);
     }

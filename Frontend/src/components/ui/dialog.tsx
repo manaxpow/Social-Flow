@@ -141,3 +141,26 @@ export {
   DialogTitle,
   DialogTrigger,
 }
+
+function VisuallyHidden({
+  children,
+  asChild = false,
+  ...props
+}: React.ComponentProps<"span"> & { asChild?: boolean }) {
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+      className: cn("sr-only", (children as React.ReactElement<{className?: string}>).props.className),
+      ...props,
+    } as Record<string, unknown>);
+  }
+  return (
+    <span
+      className="sr-only"
+      {...props}
+    >
+      {children}
+    </span>
+  )
+}
+
+export { VisuallyHidden }

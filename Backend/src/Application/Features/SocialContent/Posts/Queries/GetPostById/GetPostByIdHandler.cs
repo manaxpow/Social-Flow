@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Shop.Application.Features.Placeholder.Commands.GetPostById;
 
-public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, Result<PostResponse>>
+public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, Result<PostDetailResponse>>
 {
     private readonly IMapper _mapper;
     private readonly IPostQueries _postQueries;
@@ -14,9 +14,9 @@ public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, Result<PostR
         _postQueries = postQueries;
     }
 
-    public async Task<Result<PostResponse>> Handle(GetPostByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PostDetailResponse>> Handle(GetPostByIdQuery request, CancellationToken cancellationToken)
     {
         var post = await _postQueries.GetPostDetailAsync(request.Id, cancellationToken);
-        return Result<PostResponse>.Success(_mapper.Map<PostResponse>(post));
+        return Result<PostDetailResponse>.Success(post);
     }
 }

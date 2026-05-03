@@ -8,7 +8,7 @@ public static class CookiesHelper
         {
             HttpOnly = true,
             Secure = false,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.Lax,
         };
 
         if (expireTime.HasValue)

@@ -5,8 +5,6 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
 {
     public void Configure(EntityTypeBuilder<Conversation> builder)
     {
-        builder.ToTable("Conversations");
-
         builder.Property(c => c.Title)
             .IsRequired()
             .HasMaxLength(200);

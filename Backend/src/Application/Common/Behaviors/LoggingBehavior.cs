@@ -22,8 +22,8 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<TRequest> logger)
             timer.Stop();
             var elapsedMilliseconds = timer.ElapsedMilliseconds;
 
-            logger.LogInformation("SocialFlow Request: {Name} finished in {Elapsed}ms. Response: {@Response}",
-                requestName, elapsedMilliseconds, response);
+            logger.LogInformation("SocialFlow Request: {Name} finished in {Elapsed}ms.",
+                requestName, elapsedMilliseconds);
 
             return response;
         }

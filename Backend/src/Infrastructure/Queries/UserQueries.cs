@@ -1,37 +1,23 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
+using SocialFlow.Infrastructure.Persistence.Repositories;
 
-public class UserQueries : IUserQuries
+public class UserQueries : BaseRepository<User>, IUserQuries
 {
-
-    private readonly IDbConnectionFactory _dbConnectionFactory;
-
-    public UserQueries(IDbConnectionFactory dbConnectionFactory)
+    private readonly IMapper _mapper;
+    public UserQueries(ApplicationDbContext context, IMapper mapper) : base(context)
     {
-        _dbConnectionFactory = dbConnectionFactory;
+        _mapper = mapper;
     }
 
-    public async Task<User?> GetMe(Guid Id, CancellationToken cancellationToken)
+    public async Task<UserResponse?> GetMe(Guid Id, CancellationToken cancellationToken)
     {
-        const string sql = @"
-        SELECT 
-            ""Id"", 
-            ""UserName"", 
-            ""Email"", 
-            ""FirstName"", 
-            ""LastName"", 
-            ""DateOfBirth"", 
-            ""Gender"", 
-            ""AvatarUrl"", 
-            ""Bio"", 
-            ""LastLogin""
-        FROM ""Users""
-        WHERE ""Id"" = @Id AND ""IsActive"" = true 
-        LIMIT 1;";
-
-        using var connection = _dbConnectionFactory.CreateConnection();
-
-        return await connection.QueryFirstOrDefaultAsync<User>(
-            new CommandDefinition(sql, new { Id = Id }, cancellationToken: cancellationToken)
-        );
+        return await _dbSet
+            .AsNoTracking()
+            .Where(u => u.Id == Id)
+            .ProjectTo<UserResponse>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }
