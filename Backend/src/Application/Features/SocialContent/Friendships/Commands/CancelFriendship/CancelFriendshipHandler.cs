@@ -26,7 +26,7 @@ public class CancelFriendshipHandler : IRequestHandler<CancelFriendshipCommand, 
 
         if (friendship.CanDeleted())
         {
-            _unitOfWork.Friendships.Delete(friendship);
+            await _unitOfWork.Friendships.Delete(friendship);
         }
         // case when both users blocked each other
         else

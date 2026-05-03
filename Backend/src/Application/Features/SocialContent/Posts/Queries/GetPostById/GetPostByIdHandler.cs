@@ -17,6 +17,9 @@ public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, Result<PostD
     public async Task<Result<PostDetailResponse>> Handle(GetPostByIdQuery request, CancellationToken cancellationToken)
     {
         var post = await _postQueries.GetPostDetailAsync(request.Id, cancellationToken);
+        if (post is null)
+            return Result<PostDetailResponse>.Failure(PostErrors.NotFound);
+
         return Result<PostDetailResponse>.Success(post);
     }
 }
