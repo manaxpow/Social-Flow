@@ -1,0 +1,65 @@
+name : Social Flow - CD/CI Pipeline
+
+on:
+  push:
+    branches: ["main", "dev", "feature/**", "bugfix/**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  backend-ci:
+    name: Backend CI
+
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up .Net 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+      - name: Run tests
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults
+      - name: Publish test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: Backend/TestResults
+
+  frontend-ci:
+    name: Frontend CI
+
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+
+
+  deploy:
+    needs: [backend-ci, frontend-ci]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to Render and Vercel..."
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
