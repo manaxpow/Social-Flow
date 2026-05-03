@@ -22,7 +22,10 @@ public class UpdateCommentHandler : IRequestHandler<UpdateCommentCommand, Result
         if (comment.AuthorId != _currentUserService.UserId)
             return Result<CommentResponse>.Failure(AuthErrors.Unauthorized);
 
-        _mapper.Map(request, comment);
+        comment.UpdateContent(request.Content);
+        comment.UpdateMedia(request.Media);
+        comment.UpdateMentions(request.MentionedUserIds);
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<CommentResponse>.Success(_mapper.Map<CommentResponse>(comment));
     }

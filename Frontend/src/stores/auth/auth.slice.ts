@@ -10,12 +10,15 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isInitialized: false,
   isLoading: false,
+  isLoggingOut: false,
   error: null,
 };
 
 export const initializeAuth = createAsyncThunk(
   "auth/initialize",
   async (_, { rejectWithValue }) => {
+    // Cookies are sent automatically via withCredentials: true in axios
+    // Just check if session is valid by calling /user/me
     const response = await userService.getMe();
 
     if (!response.isSuccess || !response.data) {
@@ -34,6 +37,10 @@ export const loginAction = createAsyncThunk(
     if (!response.isSuccess || !response.data) {
       return rejectWithValue(response.error || "Login failed");
     }
+    
+    // Token is stored in http-only cookie by the backend
+    // No localStorage needed
+    
     return response.data;
   },
 );
@@ -41,6 +48,10 @@ export const loginAction = createAsyncThunk(
 export const logoutAction = createAsyncThunk(
   "auth/logout",
   async (_, { dispatch }) => {
+    // Set logging out flag BEFORE clearing cookie
+    dispatch(setLoggingOut(true));
+    
+    // Backend will clear the http-only cookie
     await authService.logout();
     dispatch(clearAuth());
   },
@@ -53,7 +64,25 @@ const authSlice = createSlice({
     clearAuth: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+      state.isLoggingOut = false; // Reset flag after clearing
       state.error = null;
+      // Clear auth cache from sessionStorage
+      console.log("[Auth Slice] Clearing auth cache...");
+      sessionStorage.removeItem("auth_cache");
+    },
+    setLoggingOut: (state, action) => {
+      state.isLoggingOut = action.payload;
+    },
+    restoreFromCache: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.isInitialized = true;
+      state.token = null; // No need to store token, it's in cookies
+    },
+    updateUserProfile: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     },
   },
   extraReducers: (builder) => {
@@ -68,12 +97,14 @@ const authSlice = createSlice({
         state.isInitialized = true; // Mark as done
         state.isAuthenticated = true;
         state.user = action.payload;
+        state.token = null; // No need to store token, it's in cookies
       })
       .addCase(initializeAuth.rejected, (state) => {
         state.isLoading = false;
         state.isInitialized = true; // Mark as done even if it fails
         state.isAuthenticated = false;
         state.user = null;
+        state.token = null;
       })
 
       // Login
@@ -85,6 +116,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
+        state.token = action.payload.token || null;
       })
       .addCase(loginAction.rejected, (state, action) => {
         state.isLoading = false;
@@ -94,9 +126,10 @@ const authSlice = createSlice({
       .addCase(logoutAction.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
+        state.token = null;
       });
   },
 });
 
-export const { clearAuth } = authSlice.actions;
+export const { clearAuth, restoreFromCache, setLoggingOut, updateUserProfile } = authSlice.actions;
 export default authSlice.reducer;

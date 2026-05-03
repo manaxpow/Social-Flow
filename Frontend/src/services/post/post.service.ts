@@ -49,14 +49,21 @@ export const postService = {
   },
 
   // 3. Tạo bài viết mới
-  createPost: async (
-    content: string,
-    mediaUrl?: string,
-  ): Promise<ApiResponse<PostResponse>> => {
+  createPost: async (params: {
+    content: string;
+    media?: Array<{
+      url: string;
+      publicId: string;
+      type: string;
+      sortOrder: number;
+    }>;
+    mentionedUserIds?: string[];
+  }): Promise<ApiResponse<PostResponse>> => {
     try {
       const response = await api.post<PostResponse>(POST_PATH, {
-        content,
-        mediaUrl,
+        content: params.content,
+        media: params.media ?? null,
+        mentionedUserIds: params.mentionedUserIds ?? [],
       });
 
       return {
@@ -71,15 +78,22 @@ export const postService = {
   },
 
   // 4. Cập nhật bài viết
-  updatePost: async (
-    id: string,
-    content: string,
-    mediaUrl?: string,
-  ): Promise<ApiResponse<PostResponse>> => {
+  updatePost: async (params: {
+    id: string;
+    content?: string;
+    media?: Array<{
+      url: string;
+      publicId: string;
+      type: string;
+      sortOrder: number;
+    }>;
+    mentionedUserIds?: string[];
+  }): Promise<ApiResponse<PostResponse>> => {
     try {
-      const response = await api.put<PostResponse>(`${POST_PATH}/${id}`, {
-        content,
-        mediaUrl,
+      const response = await api.patch<PostResponse>(`${POST_PATH}/${params.id}`, {
+        content: params.content,
+        ...(params.media ? { media: params.media } : {}),
+        mentionedUserIds: params.mentionedUserIds ?? [],
       });
 
       return {

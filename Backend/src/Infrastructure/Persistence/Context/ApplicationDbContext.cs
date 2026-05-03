@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options), IAppDbContext
@@ -15,37 +16,77 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<MessageReceipt> MessageReceipts => Set<MessageReceipt>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<CommentTree> CommentTrees => Set<CommentTree>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        var utcConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
-          v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc),
-          v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+        modelBuilder.Entity<User>(b => b.ToTable("users"));
+        modelBuilder.Entity<IdentityRole>(b => b.ToTable("roles"));
+        modelBuilder.Entity<IdentityUserRole<Guid>>(b => b.ToTable("user_roles"));
+        modelBuilder.Entity<IdentityUserClaim<Guid>>(b => b.ToTable("user_claims"));
+        modelBuilder.Entity<IdentityUserLogin<Guid>>(b => b.ToTable("user_logins"));
+        modelBuilder.Entity<IdentityRoleClaim<Guid>>(b => b.ToTable("role_claims"));
+        modelBuilder.Entity<IdentityUserToken<Guid>>(b => b.ToTable("user_tokens"));
 
-        var nullableUtcConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
-            v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v.Value : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)) : v,
-            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
-
-        // Áp dụng trực tiếp cho Entity Friendship (Nơi đang gây lỗi 500)
-        modelBuilder.Entity<Friendship>(entity =>
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            // Giả sử Friendship kế thừa BaseEntity có các trường này
-            entity.Property(e => e.CreatedAt).HasConversion(utcConverter);
+            var idProperty = entityType.FindProperty("Id");
+            if (idProperty != null && idProperty.ClrType == typeof(Guid))
+            {
+                idProperty.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
 
-            // Nếu UpdatedAt là nullable
-            entity.Property(e => e.UpdatedAt).HasConversion(nullableUtcConverter);
+                idProperty.SetDefaultValueSql("gen_random_uuid()");
+            }
+        }
 
-            // Thêm bất kỳ trường DateTime nào khác của Friendship ở đây
-        });
-
-        // Áp dụng cho OutboxMessage (Quan trọng để Test Flow chạy được)
-        modelBuilder.Entity<OutboxMessage>(entity =>
+        // Apply global query filter for all ISoftDeletable entities
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            entity.Property(e => e.OccurredAt).HasConversion(utcConverter);
-            entity.Property(e => e.ProcessedAt).HasConversion(nullableUtcConverter);
-        });
+            if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+            {
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                var property = Expression.Property(parameter, nameof(ISoftDeletable.IsDeleted));
+                var filter = Expression.Lambda(Expression.Not(property), parameter);
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
+            }
+        }
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ConvertSoftDeletes();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        ConvertSoftDeletes();
+        return base.SaveChanges();
+    }
+
+    private void ConvertSoftDeletes()
+    {
+        var entries = ChangeTracker.Entries<ISoftDeletable>()
+            .Where(e => e.State == EntityState.Deleted)
+            .ToList();
+
+        foreach (var entry in entries)
+        {
+            entry.State = EntityState.Modified;
+            entry.Entity.SoftDelete();
+
+            // Ensure owned entities (e.g., CloudAsset in PostMedia) are also set to Modified
+            // so EF Core generates correct UPDATE instead of DELETE for the shared row
+            foreach (var ownedEntry in entry.References)
+            {
+                if (ownedEntry.TargetEntry != null && ownedEntry.TargetEntry.State == EntityState.Deleted)
+                {
+                    ownedEntry.TargetEntry.State = EntityState.Modified;
+                }
+            }
+        }
     }
 }

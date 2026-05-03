@@ -21,12 +21,8 @@ public class UpdateAvatarHandler : IRequestHandler<UpdateAvatarCommand, Result<U
         var user = await _unitOfWork.Users.GetByIdAsync(userId.Value);
         if (user == null) return Result<Unit>.Failure(AuthErrors.Unauthorized);
 
-        // Tải ảnh mới lên
-        var uploadResult = await _mediaService.UploadImageAsync(request.Avatar, "avatar");
-        if (uploadResult == null || !uploadResult.IsSuccess) return Result<Unit>.Failure(UserErrors.UploadFailed);
-
         // Cập nhật URL ảnh đại diện mới
-        user.UpdateAvatar(new CloudImage(uploadResult.Url, uploadResult.PublicId));
+        user.UpdateAvatar(new CloudAsset(request.AvatarUrl, request.PublicId, MediaType.Image));
 
         // Lưu thay đổi vào database
         await _unitOfWork.SaveChangesAsync();

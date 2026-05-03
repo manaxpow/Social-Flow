@@ -7,7 +7,7 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
     {
         builder.Property(p => p.Content)
         .IsRequired(false)
-        .HasMaxLength(1000);
+        .HasMaxLength(10000);
 
         builder.Property(p => p.ReactionCount)
         .IsRequired();
@@ -18,17 +18,24 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.Property(p => p.CreatedAt)
         .IsRequired();
 
-        builder.Property(p => p.TopReactTypes)
-        .HasColumnType("jsonb");
+        builder.HasMany(p => p.MediaItems)
+           .WithOne()
+           .HasForeignKey(m => m.PostId)
+           .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsMany(p => p.TopComments, commentBuilder =>
-        {
-            commentBuilder.ToJson();
-        });
+        builder.HasMany(p => p.Mentions)
+            .WithOne(m => m.Post)
+            .HasForeignKey(m => m.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(p => p.Author)
         .WithMany(a => a.Posts)
         .HasForeignKey(p => p.AuthorId)
         .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(p => p.SharedPost)
+           .WithMany(p => p.Shares)
+           .HasForeignKey(p => p.SharedPostId)
+           .OnDelete(DeleteBehavior.Restrict);
     }
 }

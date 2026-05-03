@@ -22,21 +22,23 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
             request.LastName,
             request.DateOfBirth,
             request.Gender,
-            request.AvatarUrl,
             request.Bio);
+        Console.WriteLine(user);
+
         var result = await _userManager.CreateAsync(user, request.Password);
 
         if (!result.Succeeded)
         {
-            return Result<RegisterResponse>.Failure(result.Errors.Select(x => x.Description).ToList());
+            // Lấy lỗi đầu tiên từ Identity (ví dụ: "Password must have one non alphanumeric character")
+            var firstError = result.Errors.First();
+            return Result<RegisterResponse>.Failure(new Error(firstError.Code, firstError.Description));
         }
-
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var encodedToken = Uri.EscapeDataString(token);
         var confirmationLink =
         $"{options.Value.BaseUrl}/{options.Value.EmailConfirmationPath}?userId={user.Id}&token={encodedToken}";
 
-        _jobService.Enqueue<IEmailService>(emailService => emailService.SendEmailConfirmationEmailAsync(user.LastName, user.Email, confirmationLink));
+        _jobService.Enqueue<IEmailService>(emailService => emailService.SendEmailConfirmationEmailAsync(user.LastName, user.Email!, confirmationLink));
 
         return Result<RegisterResponse>.Success(new RegisterResponse { Id = user.Id });
     }

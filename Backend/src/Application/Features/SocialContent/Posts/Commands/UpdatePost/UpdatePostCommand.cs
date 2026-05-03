@@ -1,9 +1,8 @@
-
 using MediatR;
 
 public record UpdatePostCommand(
     Guid Id,
     string? Content,
-    string? MediaUrl,
+    IEnumerable<CreatePostMediaRequest>? Media,
     List<Guid> MentionedUserIds
 ) : IRequest<Result<PostResponse>>;

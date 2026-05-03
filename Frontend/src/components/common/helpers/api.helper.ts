@@ -16,15 +16,26 @@ export const handleApiError = <T>(error: unknown): ApiResponse<T> => {
     status = error.response?.status || 500;
     const serverData = error.response?.data as ErrorApiResponse;
 
+    // Extract validation errors if present
+    let detail = serverData?.detail || error.message;
+    if (serverData?.errors && typeof serverData.errors === 'object') {
+      const validationErrors = serverData.errors as Record<string, string[]>;
+      const errorMessages = Object.values(validationErrors).flat();
+      if (errorMessages.length > 0) {
+        detail = errorMessages.join(' | ');
+      }
+    }
+
     errorObject = {
       ...errorObject,
       ...serverData,
       status: status,
-      detail: serverData?.detail || error.message,
+      detail: detail,
       instance: serverData?.instance || "N/A",
     };
 
     console.error("API Error:", errorObject);
+    console.error(errorObject.detail);
   }
 
   return {

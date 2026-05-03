@@ -1,21 +1,26 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+
 
 public static class Persistence
 {
     public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
+        services.AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
+            options.UseSnakeCaseNamingConvention();
             var interceptor = sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>();
 
             options.AddInterceptors(interceptor);
             options.UseNpgsql(connectionString, b =>
-                b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+            {
+                b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
         });
 
 
@@ -32,6 +37,7 @@ public static class Persistence
 
 
         // Dapper
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
         services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 
         services.AddScoped<IPostQueries, PostQueries>();

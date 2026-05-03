@@ -5,7 +5,6 @@ public class OutboxConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {
     public void Configure(EntityTypeBuilder<OutboxMessage> builder)
     {
-        builder.ToTable("OutboxMessages");
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Type).IsRequired();
@@ -13,6 +12,6 @@ public class OutboxConfiguration : IEntityTypeConfiguration<OutboxMessage>
         builder.Property(x => x.Content).IsRequired();
 
         builder.HasIndex(x => x.ProcessedAt)
-            .HasFilter("\"ProcessedAt\" IS NULL");
+            .HasFilter("\"processed_at\" IS NULL");
     }
 }

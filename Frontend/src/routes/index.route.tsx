@@ -10,29 +10,26 @@ import { authRoutes } from "./auth.route";
 import { publicRoutes } from "./public.route";
 import { clientRoutes } from "./client.route";
 import { socialRoutes } from "./social.route";
-import { RootConditionalRenderer } from "@/layout/client/root.condition-render";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <AuthProvider>
         <MainLayout />
-      </AuthProvider>
     ),
     children: [
       {
-        index: true,
-        element: <RootConditionalRenderer />,
-      },
-
-      {
-        element: <PublicLayout />,
+        element:
+          <PublicLayout />
+  ,
         children: [...publicRoutes, ...authRoutes],
       },
 
       {
-        element: <ClientLayout />,
+        element:
+        <AuthProvider>
+          <ClientLayout />
+        </AuthProvider>,
         children: [...socialRoutes, ...clientRoutes],
       },
     ],

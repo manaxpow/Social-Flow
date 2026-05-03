@@ -59,6 +59,12 @@ public class IdentityService : IIdentityService
             return Result<User>.Failure(AuthErrors.InvalidCredentials);
         }
 
+        if (!user.EmailConfirmed)
+        {
+            _logger.LogWarning("Đăng nhập thất bại: Email {Email} chưa được xác nhận.", email);
+            return Result<User>.Failure(AuthErrors.EmailNotConfirmed);
+        }
+
         _logger.LogInformation("Người dùng {Email} đăng nhập thành công.", email);
         await _userManager.ResetAccessFailedCountAsync(user);
         return Result<User>.Success(user);

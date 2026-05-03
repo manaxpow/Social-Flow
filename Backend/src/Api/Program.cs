@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Application;
@@ -10,19 +11,21 @@ using SocialFlow.Domain.Exceptions;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-var builder = WebApplication.CreateBuilder(args);
-
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
-    .CreateLogger();
-
-
-builder.Host.UseSerilog();
-
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
 try
 {
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+      .ReadFrom.Configuration(context.Configuration)
+      .ReadFrom.Services(services)
+      .Enrich.FromLogContext());
+
     Log.Information(">>> SocialFlow Backend is starting up...");
 
     // Add services layer   
@@ -30,7 +33,6 @@ try
     builder.Services.AddApplicationServices();
 
     builder.Services.AddSignalR();
-    // Add cors
 
     var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
     builder.Services.AddCors(options =>
@@ -46,19 +48,23 @@ try
             }
             else if (builder.Environment.IsDevelopment())
             {
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                policy.SetIsOriginAllowed(origin => true)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+
+                Log.Warning(">>> CORS is allowing any origin with credentials. Ensure this is only for Dev.");
             }
         });
     });
 
-    // Add rate limiter
     builder.Services.AddRateLimiter(options =>
     {
         options.AddFixedWindowLimiter(policyName: "fixed", options =>
         {
-            options.PermitLimit = 100; // Số lượng request tối đa
+            options.PermitLimit = 100;
             options.Window = TimeSpan.FromMinutes(1);
-            options.QueueLimit = 2; // Số lượng request chờ trong hàng đợi
+            options.QueueLimit = 2;
             options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         });
 
@@ -71,18 +77,17 @@ try
 
     builder.Services.AddControllers().AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: true));
     });
 
     builder.Services.AddEndpointsApiExplorer();
-
-    // Add swagger
     builder.Services.AddOpenApi();
     builder.Services.AddSwaggerDocumentaion();
 
     var app = builder.Build();
 
-    // Use Serilog request logging 
     app.UseSerilogRequestLogging(options =>
     {
         options.GetLevel = (httpContext, elapsed, ex) =>
@@ -93,44 +98,42 @@ try
             return LogEventLevel.Error;
         };
     });
+
+
     app.UseCors("SocialFlowCorsPolicy");
-    // Use global exception handling middleware
+
+    app.UseHttpsRedirection();
+
+    app.UseRouting();
+
+    app.UseRateLimiter();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseMiddleware<GlobalExceptionMiddleware>();
 
+    app.MapControllers();
 
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
-        app.UseSwagger(); // Tạo file swagger.json
+        app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
-            // Phải khớp với tên "v1" bạn đặt trong Extension
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialFlow API v1");
-            options.RoutePrefix = "swagger"; // Mở bằng URL: localhost:port/swagger
+            options.RoutePrefix = "swagger";
         });
     }
 
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions { });
 
-    app.UseHttpsRedirection();
-
-    app.UseRateLimiter();
-    app.MapControllers();
-
-    app.UseHangfireDashboard("/hangfire", new DashboardOptions
-    {
-
-    });
-
-    // Add SignalR
     app.MapHub<NotificationHub>("/hubs/notifications");
 
-    // Cron job
     app.Services.UseBackgroundJobs();
 
     app.Run();
-
-
 }
 catch (Exception ex)
 {

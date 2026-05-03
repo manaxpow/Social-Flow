@@ -1,4 +1,4 @@
-public class Mention : Entity
+public sealed class Mention : Entity
 {
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
@@ -8,10 +8,23 @@ public class Mention : Entity
     public Comment? Comment { get; private set; }
     public Mention() { }
 
-    public Mention(Guid userId, Guid? postId, Guid? commentId)
+    public static Mention CreateForPost(Guid userId, Guid postId)
     {
-        UserId = userId;
-        PostId = postId;
-        CommentId = commentId;
+        return new Mention
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            PostId = postId
+        };
+    }
+
+    public static Mention CreateForComment(Guid userId, Guid commentId)
+    {
+        return new Mention
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            CommentId = commentId
+        };
     }
 }

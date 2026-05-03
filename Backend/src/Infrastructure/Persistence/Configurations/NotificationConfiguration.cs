@@ -5,8 +5,6 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
 {
     public void Configure(EntityTypeBuilder<Notification> builder)
     {
-        builder.ToTable("Notifications");
-
         builder.Property(n => n.Type)
             .IsRequired();
 

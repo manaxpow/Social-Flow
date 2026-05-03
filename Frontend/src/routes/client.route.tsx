@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
-import UserProfile from "@/components/features/user/profile/profile.index";
+import { ClientProfilePage } from "@/pages/client/profile.page";
 
 export const clientRoutes: RouteObject[] = [
-  { path: ":id", element: <UserProfile /> },
+  { path: "profile/:id", element: <ClientProfilePage /> },
 ];

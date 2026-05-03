@@ -93,8 +93,11 @@ export default function RegisterPageComponent() {
     const response = await authService.register(userCreate);
 
     if (response.status >= 200 && response.status < 300) {
-      toast.success("Registration successful! Welcome to SocialFlow.");
-      navigate("/auth/login");
+      toast.success("Registration successful! Please check your email to confirm your account.");
+      // Navigate after a short delay to let user read the toast
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 2000);
     } else {
       const serverError = response.error;
       if (serverError?.errors) {

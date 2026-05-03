@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using AutoMapper;
 
 public class MappingProfile : Profile
@@ -15,13 +16,10 @@ public class MappingProfile : Profile
 
         foreach (var type in types)
         {
-            var instance = Activator.CreateInstance(type);
-            var methodInfo = type.GetMethod("Mapping");
+            var instance = RuntimeHelpers.GetUninitializedObject(type);
 
-            if (methodInfo == null)
-            {
-                methodInfo = type.GetInterface("IMapFrom`1")?.GetMethod("Mapping");
-            }
+            var methodInfo = type.GetMethod("Mapping")
+                         ?? type.GetInterface("IMapFrom`1")?.GetMethod("Mapping");
 
             methodInfo?.Invoke(instance, new object[] { this });
         }

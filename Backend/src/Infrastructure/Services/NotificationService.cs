@@ -27,4 +27,17 @@ public class NotificationService : INotificationService
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
+
+    public Task CreateNotificationForMentionUserAsync(Guid authorID, Guid targetId, TargetType targetType, string message, NotificationType notificationType, List<Guid> mentionsId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task CreateNotificationForUser(Guid senderId, Guid receiverId, string message, NotificationType notificationType, CancellationToken cancellationToken)
+    {
+        var notification = new Notification(senderId, receiverId, message, notificationType);
+
+        await _unitOfWork.Notifications.AddAsync(notification);
+        await _unitOfWork.SaveChangesAsync();
+    }
 }

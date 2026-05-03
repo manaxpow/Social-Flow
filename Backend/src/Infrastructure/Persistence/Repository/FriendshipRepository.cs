@@ -22,6 +22,21 @@ public class FriendshipRepository : BaseRepository<Friendship>, IFriendshipRepos
             .Select(f => f.UserId1 == userId ? f.UserId2 : f.UserId1)
             .ToListAsync(cancellationToken);
     }
+
+    public Task<int> GetFollowersCountAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return _dbSet
+            .Where(f => f.UserId2 == userId && f.Status == FriendshipStatus.Accepted)
+            .CountAsync(cancellationToken);
+    }
+
+    public Task<int> GetFollowingCountAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return _dbSet
+            .Where(f => f.UserId1 == userId && f.Status == FriendshipStatus.Accepted)
+            .CountAsync(cancellationToken);
+    }
+
     public async Task<Friendship?> GetRelationBetweenUsersAsync(Guid userId1, Guid userId2, CancellationToken cancellationToken = default)
     {
         var id1 = userId1 < userId2 ? userId1 : userId2;

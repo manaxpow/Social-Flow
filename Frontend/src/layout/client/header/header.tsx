@@ -3,9 +3,10 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoginDropdown } from "./login.dropdow";
+import { useAppSelector } from "@/stores/hook";
 
 export function Header() {
-  const isAuthenticated = true;
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   return (
     <header className="sticky top-0 z-50 w-full px-5 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -32,7 +33,7 @@ export function Header() {
         {/* Navigation & User Actions */}
         <nav className="flex items-center gap-4">
           {isAuthenticated ? (
-            <LoginDropdown />
+            <LoginDropdown user={user} />
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" asChild>

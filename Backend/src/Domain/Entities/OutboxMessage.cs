@@ -1,4 +1,4 @@
-public class OutboxMessage : Entity
+public sealed class OutboxMessage : Entity
 {
     public string Type { get; private set; } = string.Empty;
     public string Content { get; private set; } = string.Empty;

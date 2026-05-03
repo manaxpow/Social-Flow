@@ -24,7 +24,7 @@ public class FriendshipRequestNotificationHandler : INotificationHandler<Friends
             notification.FriendshipId);
 
         await _unitOfWork.Notifications.AddAsync(notificationEntity);
-        var result = await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         bool isOnline = await _userTracker.IsUserOnline(notification.ReceiverId);
         if (isOnline)

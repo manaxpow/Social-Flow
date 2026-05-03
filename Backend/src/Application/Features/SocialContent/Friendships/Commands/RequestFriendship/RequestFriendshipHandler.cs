@@ -30,7 +30,7 @@ public class RequestFriendshipHandler : IRequestHandler<RequestFriendshipCommand
             userReceive.Id,
             userSend.Value,
             sender.FirstName + " " + sender.LastName,
-            sender.AvatarUrl ?? string.Empty,
+            sender.Avatar?.Url ?? string.Empty,
             FriendshipStatus.Pending);
 
         await _unitOfWork.Friendships.AddAsync(friendship);

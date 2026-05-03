@@ -2,8 +2,8 @@
 using MediatR;
 
 public record CreatePostCommand(
-    string Content,
-    string? MediaUrl,
+    string? Content,
+    IEnumerable<CreatePostMediaRequest>? Media,
     Guid? SharedPostId,
-    List<Guid> MentionedUserIds
-) : IRequest<Result<PostResponse>>;
+    List<Guid>? MentionedUserIds
+) : IRequest<Result<PostDetailResponse>>;

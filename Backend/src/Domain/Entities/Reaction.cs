@@ -1,10 +1,10 @@
-public class Reaction : AggregateRoot
+public sealed class Reaction : AggregateRoot, IOwnable
 {
     public Guid TargetId { get; private set; }
     public TargetType TargetType { get; private set; }
     public Guid UserId { get; private set; }
+    Guid IOwnable.AuthorId => UserId;
     public ReactType ReactType { get; private set; }
-
     public User User { get; private set; } = null!;
 
     public Reaction() { }

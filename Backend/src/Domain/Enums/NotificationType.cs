@@ -7,6 +7,7 @@ public enum NotificationType
     Mention = 5,
     PostCreated = 6,
 
+
     // Content & Sharing
     Share = 10,
 

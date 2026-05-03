@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Eye, EyeOff } from "lucide-react"; // Thêm Eye và EyeOff
-import { Link, useNavigate } from "react-router-dom";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/form";
 import { loginSchema, type LoginValues } from "@/lib/zod/auth/login.schema";
 import { SocialLogin } from "../social.login";
-import { useState } from "react"; // Thêm useState
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/stores/hook";
 import { loginAction } from "@/stores/auth/auth.slice";
 import type { ErrorApiResponse } from "@/types/error.response";
+import { authService } from "@/services/auth/auth.service";
 
 export default function LoginPageComponent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,21 +34,42 @@ export default function LoginPageComponent() {
   const isLoading = form.formState.isSubmitting;
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
+
+  // Get the path the user was trying to access
+  // Default to "/" (root) like Facebook - root route will redirect authenticated users to feed
+  const from = location.state?.from || "/";
 
   const onSubmit = async (values: LoginValues) => {
     const resultAction = await dispatch(loginAction(values));
 
     if (loginAction.fulfilled.match(resultAction)) {
       toast.success("Login successful!");
-      navigate("/");
+      // Navigate to the page the user was trying to access, or default to feed
+      navigate(from, { replace: true });
     }
 
     if (loginAction.rejected.match(resultAction)) {
       const errorData = resultAction.payload as ErrorApiResponse;
+      const errorCode = errorData?.code;
       const remaining = errorData?.remainingAttempts;
 
-      if (remaining !== undefined) {
+      if (errorCode === "Auth.EmailNotConfirmed") {
+        toast.error(errorData?.detail ?? "Please confirm your email before logging in.", {
+          action: {
+            label: "Resend email",
+            onClick: async () => {
+              const res = await authService.resendConfirmation(values.email);
+              if (res.isSuccess) {
+                toast.success("Confirmation email sent! Check your inbox.");
+              } else {
+                toast.error("Failed to send email. Please try again.");
+              }
+            },
+          },
+        });
+      } else if (remaining !== undefined) {
         toast.warning(`Login failed. ${remaining} attempts remaining.`);
       } else {
         toast.error(errorData?.detail ?? "Login failed. Please try again.");

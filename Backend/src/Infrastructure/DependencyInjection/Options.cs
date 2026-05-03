@@ -8,7 +8,7 @@ public static class SettingsDependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         services.Configure<ClientSettings>(configuration.GetSection("ClientSettings"));
-
+        services.Configure<CloudinarySettings>(configuration.GetSection("Cloudinary"));
         return services;
     }
 }

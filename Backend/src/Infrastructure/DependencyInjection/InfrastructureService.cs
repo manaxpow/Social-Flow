@@ -14,6 +14,7 @@ public static class InfrastructureService
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IWebNotificationService, WebNotificationService>();
+        services.AddScoped<IMediaService, CloudinaryMediaService>();
         // Transient
         services.AddTransient<IEmailService, EmailService>();
         return services;

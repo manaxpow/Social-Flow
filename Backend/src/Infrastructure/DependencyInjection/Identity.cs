@@ -16,33 +16,32 @@ public static class Identity
         {
             throw new InvalidOperationException("JWT settings are not configured properly.");
         }
+        services.AddIdentity<User, IdentityRole<Guid>>(options =>
         {
-            services.AddIdentity<User, IdentityRole<Guid>>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 8;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddRoles<IdentityRole<Guid>>()
-            .AddSignInManager()
-            .AddDefaultTokenProviders();
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 8;
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddRoles<IdentityRole<Guid>>()
+        .AddSignInManager()
+        .AddDefaultTokenProviders();
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                // config lockout
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
+        services.Configure<IdentityOptions>(options =>
+        {
+            // config lockout
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.AllowedForNewUsers = true;
 
-                // config email
-                options.SignIn.RequireConfirmedEmail = true;
-            });
+            // config email
+            options.SignIn.RequireConfirmedEmail = true;
+        });
 
-            services.AddAuthentication(options =>
+        services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -78,7 +77,6 @@ public static class Identity
                 }
             };
         });
-            return services;
-        }
+        return services;
     }
 }

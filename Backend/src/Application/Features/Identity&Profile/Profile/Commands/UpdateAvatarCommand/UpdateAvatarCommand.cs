@@ -1,4 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-public record UpdateAvatarCommand(IFormFile Avatar) : IRequest<Result<Unit>>;
+public record UpdateAvatarCommand(
+    string AvatarUrl,
+    MediaType MediaType,
+    string PublicId
+) : IRequest<Result<Unit>>;

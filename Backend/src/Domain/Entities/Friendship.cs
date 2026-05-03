@@ -1,4 +1,4 @@
-public class Friendship : AggregateRoot
+public sealed class Friendship : AggregateRoot
 {
     public Guid UserId1 { get; private set; }
     public Guid UserId2 { get; private set; }
