@@ -36,6 +36,7 @@ jobs:
 
       - name: Run tests
         env:
+          ASPNETCORE_ENVIRONMENT: Development
           TESTCONTAINERS_RYUK_DISABLED: false
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
@@ -69,7 +70,7 @@ jobs:
           cache-dependency-path: './Frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --legacy-peer-deps
+        run: pnpm install --no-frozen-lockfile --no-strict-peer-dependencies
 
       - name: Build
         run: pnpm run build

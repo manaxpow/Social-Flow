@@ -1,3 +1,4 @@
+using DotNet.Testcontainers.Builders;
 using Hangfire;
 using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Authentication;
@@ -7,15 +8,22 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 
 public class SocialFlowApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder("postgres:latest")
-        .WithDatabase("SocialFlow").WithUsername("postgres").WithPassword("2552004nam").Build();
+        .WithDatabase("SocialFlow")
+        .WithUsername("postgres")
+        .WithPassword("2552004nam")
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(5432))
+        .Build();
 
-    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:latest").Build();
+    private readonly RedisContainer _redisContainer = new RedisBuilder("redis:latest")
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(6379))
+        .Build();
 
     public string RedisConnectionString => _redisContainer.GetConnectionString();
     public string DbConnectionString => _dbContainer.GetConnectionString();
