@@ -31,6 +31,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<IdentityRoleClaim<Guid>>(b => b.ToTable("role_claims"));
         modelBuilder.Entity<IdentityUserToken<Guid>>(b => b.ToTable("user_tokens"));
 
+        // Setup using UTC date time
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                    ));
+                }
+            }
+        }
+
+        // Setup auto genarate id
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var idProperty = entityType.FindProperty("Id");

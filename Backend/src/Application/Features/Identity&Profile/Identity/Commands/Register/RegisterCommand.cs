@@ -1,4 +1,5 @@
 using MediatR;
+using SocialFlow.Domain.Enums;
 
 public class RegisterCommand : IRequest<Result<RegisterResponse>>
 {

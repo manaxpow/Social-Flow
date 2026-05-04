@@ -206,7 +206,7 @@ public class UpdatePostTests : IntegrationTestBase
         var response = await Client.PatchAsJsonAsync($"/api/post/{postId}", request);
 
         // Assert — handler returns AuthErrors.Forbidden which maps to 400 via ResultExtensions
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
 
         // Verify content was NOT changed
         var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
@@ -247,7 +247,7 @@ public class UpdatePostTests : IntegrationTestBase
         await CreateUserAsync(authorId);
 
         var postId = await SeedPostAsync(authorId);
-        var longContent = new string('b', 2001);
+        var longContent = new string('b', 10001);
 
         var request = new UpdatePostCommand(
             Guid.Empty,

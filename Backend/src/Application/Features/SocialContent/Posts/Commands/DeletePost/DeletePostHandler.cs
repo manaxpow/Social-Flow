@@ -18,7 +18,7 @@ public class DeletePostHandler : IRequestHandler<DeletePostCommand, Result<Unit>
 
         if (post.AuthorId != _currentUserService.UserId) return Result<Unit>.Failure(AuthErrors.Unauthorized);
 
-        _unitOfWork.Posts.Delete(post);
+        await _unitOfWork.Posts.Delete(post);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<Unit>.Success(Unit.Value);
     }

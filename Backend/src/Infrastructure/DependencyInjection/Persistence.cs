@@ -10,6 +10,8 @@ public static class Persistence
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>();
 
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.UseSnakeCaseNamingConvention();

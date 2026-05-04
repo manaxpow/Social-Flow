@@ -1,5 +1,5 @@
-
 using MediatR;
+using SocialFlow.Domain.Enums;
 
 public record UpdateProfileCommand(
     string? FirstName,

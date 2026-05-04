@@ -119,7 +119,7 @@ public class DeletePostTests : IntegrationTestBase
         var response = await Client.DeleteAsync($"/api/post/{postId}");
 
         // Assert — handler checks post.AuthorId != currentUser and returns AuthErrors.Unauthorized
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
         // Verify post was NOT deleted
         var post = await Context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
