@@ -28,7 +28,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
           cache: true
-          cache-dependency-path: Backend/SocialFlow/sln
+          cache-dependency-path: ./Backend/SocialFlow.sln
 
       - name: Restore dependencies
         run: dotnet restore
