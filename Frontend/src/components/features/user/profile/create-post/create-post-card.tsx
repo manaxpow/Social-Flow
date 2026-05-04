@@ -218,16 +218,6 @@ export const CreatePostCard = () => {
   const hasUploadingItems = mediaItems.some((m) => m.isUploading);
   const canSubmit = (contentValue?.trim().length > 0 || mediaItems.length > 0) && !hasUploadingItems;
 
-  // Auto-resize textarea handler
-  const CONTENT_MAX_HEIGHT = 400;
-  const handleContentInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const textarea = e.target as HTMLTextAreaElement;
-    setValue("content", textarea.value);
-    // Auto-resize: reset height then set to scrollHeight (up to max)
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, CONTENT_MAX_HEIGHT) + 'px';
-  };
-
   // Simple media preview grid
   const renderMediaGrid = () => {
     if (mediaItems.length === 0) return null;

@@ -3,7 +3,7 @@ import { Chrome } from "lucide-react";
 import { useState } from "react";
 
 export const SocialLogin = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   return (
     <div>

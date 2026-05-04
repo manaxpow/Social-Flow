@@ -19,7 +19,6 @@ interface AboutTabProps {
 }
 
 export const AboutTab = ({
-  name = "User Name",
   bio,
   email,
   phone,

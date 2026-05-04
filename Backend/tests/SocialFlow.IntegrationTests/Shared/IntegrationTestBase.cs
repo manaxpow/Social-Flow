@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;
@@ -64,13 +65,32 @@ public abstract class IntegrationTestBase : IClassFixture<SocialFlowApiFactory>,
 
     protected async Task<User> CreateUserAsync(Guid? id = null)
     {
-        var user = new User
+        var userId = id ?? Guid.NewGuid();
+        var user = new User(
+            $"test_{userId}@flow.com",
+            "Test",
+            "User",
+            new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            SocialFlow.Domain.Enums.Gender.Male,
+            null
+        )
         {
-            Id = id ?? Guid.NewGuid(),
-            UserName = $"user_{Guid.NewGuid().ToString()[..8]}",
-            Email = $"test_{Guid.NewGuid()}@flow.com",
-            PasswordHash = "MockPasswordHash_12345",
+            Id = userId,
+            UserName = $"user_{userId.ToString()[..8]}",
+            NormalizedEmail = $"TEST_{userId}@FLOW.COM",
+            NormalizedUserName = $"USER_{userId.ToString()[..8].ToUpper()}",
         };
+        // Set DateTime properties via reflection since they have private setters
+        var userType = typeof(User);
+        var lastLoginProperty = userType.GetProperty("LastLogin");
+        lastLoginProperty?.SetValue(user, DateTime.UtcNow);
+        var refreshExpiryProperty = userType.GetProperty("RefreshTokenExpiryTime");
+        refreshExpiryProperty?.SetValue(user, DateTime.UtcNow.AddDays(7));
+
+        // Set PasswordHash to satisfy the NOT NULL constraint
+        var passwordHasher = new PasswordHasher<User>();
+        user.PasswordHash = passwordHasher.HashPassword(user, "TestPassword123!");
+
         Context.Users.Add(user);
         await Context.SaveChangesAsync();
 

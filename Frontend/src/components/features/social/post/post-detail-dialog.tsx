@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Heart,
   MessageCircle,
@@ -17,7 +17,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { UserAvatarLink } from "@/components/common/user-link";
 import { useAppSelector } from "@/stores/hook";
-import { useQueryClient } from "@tanstack/react-query";
 import { PhotoDialog } from "./photo-dialog";
 import { commentService } from "@/services/comment/comment.service";
 import { toast } from "sonner";
@@ -53,7 +52,6 @@ export const PostDetailDialog = ({
   initialMediaIndex = 0,
 }: PostDetailDialogProps) => {
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -63,8 +61,6 @@ export const PostDetailDialog = ({
   const [isPostExpanded, setIsPostExpanded] = useState(false);
   const [localCommentCount, setLocalCommentCount] = useState(post.commentCount || 0);
   const [localReactionCount, setLocalReactionCount] = useState(post.reactionCount || 0);
-  const [isCreatingComment, setIsCreatingComment] = useState(false);
-  const [isDeletingComment, setIsDeletingComment] = useState(false);
   const loadCountRef = useRef(0);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
@@ -175,7 +171,6 @@ export const PostDetailDialog = ({
     setComments((prev) => [...prev, skeletonComment]);
     setLocalCommentCount((prev) => prev + 1);
 
-    setIsCreatingComment(true);
     try {
       const response = await api.post(`/comment`, {
         PostId: post.id,
@@ -220,8 +215,6 @@ export const PostDetailDialog = ({
       } else {
         toast.error("Không thể gửi bình luận");
       }
-    } finally {
-      setIsCreatingComment(false);
     }
   };
 

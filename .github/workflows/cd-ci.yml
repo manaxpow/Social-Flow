@@ -1,0 +1,90 @@
+name : Social Flow - CD/CI Pipeline
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  
+on:
+  push:
+    branches: ["main", "dev", "feature/**", "bugfix/**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  backend-ci:
+    name: Backend CI
+
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Docker version
+        run: docker version
+
+      - name: Set up .Net 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: ./Backend/SocialFlow.sln
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release 
+
+      - name: Run tests
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          TESTCONTAINERS_RYUK_DISABLED: false
+        run: dotnet test --no-build --configuration Release --logger:"console;verbosity=detailed" --collect:"XPlat Code Coverage" --results-directory ./TestResults
+
+      - name: Publish test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: Backend/TestResults
+
+  frontend-ci:
+    name: Frontend CI
+
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          cache-dependency-path: './Frontend/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --no-strict-peer-dependencies
+
+      - name: Build
+        run: pnpm run build
+
+
+  deploy:
+    needs: [backend-ci, frontend-ci]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to Render and Vercel..."
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}

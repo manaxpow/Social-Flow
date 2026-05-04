@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using SocialFlow.Domain.Enums;
 
 public class User : IdentityUser<Guid>, IHasDomainEvents
 {
@@ -27,7 +28,10 @@ public class User : IdentityUser<Guid>, IHasDomainEvents
     public void AddDomainEvent(IDomainEvent @event) => _domainEvents.Add(@event);
     public void ClearDomainEvents() => _domainEvents.Clear();
 
-    public User() { }
+    public User()
+    {
+        LastLogin = DateTime.UtcNow;
+    }
 
     public User(string email, string firstName, string lastName, DateTime dateOfBirth, Gender gender, string? bio) : base(email)
     {

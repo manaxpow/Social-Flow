@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
-import { Camera, Loader2, Check, X } from "lucide-react";
+import { Camera, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAppDispatch } from "@/stores/hook";
@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { userService } from "@/services/user/user.service";
 import { mediaService } from "@/services/media/media.service";
 import type { SetupUploadResponse } from "@/services/media/dtos/setup-upload-response";
 import api from "@/lib/axios/axios";

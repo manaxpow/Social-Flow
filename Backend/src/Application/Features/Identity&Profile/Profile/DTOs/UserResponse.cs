@@ -1,4 +1,5 @@
 using AutoMapper;
+using SocialFlow.Domain.Enums;
 
 public record UserResponse() : IMapFrom<User>
 {

@@ -9,11 +9,9 @@ public class CreateCommentValidator : AbstractValidator<CreateCommentCommand>
         RuleFor(x => x.Content).NotEmpty().When(x => x.Media == null).WithMessage("Content is required when media is not provided.")
         .MaximumLength(2000).WithMessage("Content cannot exceed 2000 characters.");
 
-        RuleFor(x => x.Media).ChildRules(media =>
-       {
-           media.RuleFor(m => m.Url).NotEmpty().WithMessage("Media URL is required.");
-           media.RuleFor(m => m.PublicId).NotEmpty().WithMessage("Media PublicId is required.");
-       }).When(x => x.Media != null);
+        RuleFor(x => x.Media)
+        .SetValidator(new CloudAssetValidator()!)
+        .When(x => x.Media != null);
 
         RuleFor(x => x).Must(x => !string.IsNullOrWhiteSpace(x.Content) || x.Media != null)
             .WithMessage("Comment must have either content or media.");

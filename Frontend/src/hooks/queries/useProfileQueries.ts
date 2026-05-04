@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user/user.service";
 import { postService } from "@/services/post/post.service";
 import type { PostDetailResponse } from "@/services/post/dtos/response/post-detail.response";
-import type { UserResponse } from "@/services/user/dtos/user.reponse";
 import type { ApiResponse } from "@/types/api.response";
 import type { PagedList } from "@/types/paged-list.response";
 import { toast } from "sonner";
@@ -165,7 +164,7 @@ export const useCreatePost = () => {
       // Return a context object with the snapshotted value
       return { previousPosts };
     },
-    onError: (err, variables, context) => {
+    onError: (err, _variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousPosts) {
         queryClient.setQueryData(
@@ -250,7 +249,7 @@ export const useDeletePost = () => {
       
       return { previousPosts };
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousPosts) {
         queryClient.setQueryData(
           postsKeys.userPosts("me", 1, 10),

@@ -28,7 +28,7 @@ public class CreateReactionHandler : IRequestHandler<CreateReactionCommand, Resu
             // If same type -> toggle off (soft delete)
             if (existingReaction.ReactType == request.ReactType)
             {
-                _unitOfWork.Reactions.Delete(existingReaction);
+                await _unitOfWork.Reactions.Delete(existingReaction);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result<ReactionResponse>.Success(_mapper.Map<ReactionResponse>(existingReaction));
             }

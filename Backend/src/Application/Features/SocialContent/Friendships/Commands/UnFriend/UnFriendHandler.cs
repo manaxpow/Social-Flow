@@ -25,7 +25,7 @@ public class UnFriendHandler : IRequestHandler<UnFriendCommand, Result<Unit>>
             return Result<Unit>.Failure(FriendshipErrors.UnFriendFailed);
         }
 
-        _unitOfWork.Friendships.Delete(friendship);
+        await _unitOfWork.Friendships.Delete(friendship);
         await _unitOfWork.SaveChangesAsync();
         return Result<Unit>.Success(Unit.Value);
     }

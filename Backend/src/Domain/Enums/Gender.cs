@@ -1,3 +1,5 @@
+namespace SocialFlow.Domain.Enums;
+
 public enum Gender
 {
     Male = 1,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ChevronDown, ChevronUp, Pencil, Trash2, MoreHorizontal, FileText, Download, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Heart, ChevronDown, ChevronUp, Pencil, Trash2, MoreHorizontal, FileText, Download, Loader2, AlertCircle } from "lucide-react";
 import { UserAvatarLink } from "@/components/common/user-link";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -81,7 +81,7 @@ export const CommentBase = ({
   children,
   replyInput,
   status,
-  onRetry,
+  onRetry: _onRetry,
 }: CommentBaseProps) => {
   // Determine status-based styling
   const isPending = status === 'pending';

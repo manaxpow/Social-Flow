@@ -36,7 +36,7 @@ public class CreatePostValidator : AbstractValidator<CreatePostCommand>
             .When(x => x.Content != null);
 
         RuleFor(x => x.MentionedUserIds)
-            .Must(ids => ids.Distinct().Count() == ids.Count)
+            .Must(ids => ids?.Distinct().Count() == ids?.Count)
             .WithMessage("Duplicate mentions are not allowed.")
             .When(x => x.MentionedUserIds != null);
     }

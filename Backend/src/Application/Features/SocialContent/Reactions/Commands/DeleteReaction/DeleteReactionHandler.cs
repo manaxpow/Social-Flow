@@ -17,7 +17,7 @@ public class DeleteReactionHandler : IRequestHandler<DeleteReactionCommand, Resu
 
         if (reaction.UserId != _currentUserService.UserId) return Result<Unit>.Failure(AuthErrors.Unauthorized);
 
-        _unitOfWork.Reactions.Delete(reaction);
+        await _unitOfWork.Reactions.Delete(reaction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result<Unit>.Success(Unit.Value);
     }

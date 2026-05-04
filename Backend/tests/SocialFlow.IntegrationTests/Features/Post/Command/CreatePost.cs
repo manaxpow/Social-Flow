@@ -302,7 +302,7 @@ public class CreatePostTests : IntegrationTestBase
         AuthenticateAs(authorId);
         await CreateUserAsync(authorId);
 
-        var longContent = new string('a', 2001);
+        var longContent = new string('a', 10001);
 
         var request = new CreatePostCommand(
             longContent,

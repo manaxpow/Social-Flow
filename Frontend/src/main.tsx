@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "./stores/index.ts";
 import { AppRouter } from "./routes/index.route.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
-import { AuthProvider } from "./providers/auth.provider.tsx";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -21,10 +20,8 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      {/* <AuthProvider> */}
-        <Toaster position="top-right" richColors />
-        <AppRouter />
-      {/* </AuthProvider> */}
+      <Toaster position="top-right" richColors />
+      <AppRouter />
     </QueryClientProvider>
   </Provider>
 );
