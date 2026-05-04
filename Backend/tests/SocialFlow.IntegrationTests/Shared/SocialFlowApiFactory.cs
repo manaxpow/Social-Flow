@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using StackExchange.Redis;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 
@@ -59,11 +60,18 @@ public class SocialFlowApiFactory : WebApplicationFactory<Program>, IAsyncLifeti
         });
         builder.ConfigureTestServices(services =>
         {
-            // Tắt Hangfire Server tự động để tránh quét bảng Outbox khi chưa sẵn sàng
+            // Replace hangfire
             var hangfireServer = services.FirstOrDefault(d => d.ImplementationType?.Name.Contains("BackgroundJobServer") == true);
             if (hangfireServer != null) services.Remove(hangfireServer);
 
-            // Thay thế DB Connection
+            // Replace Redis
+            var redisDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IConnectionMultiplexer));
+            if (redisDescriptor != null) services.Remove(redisDescriptor);
+
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+             ConnectionMultiplexer.Connect(RedisConnectionString));
+
+            // Replay db connection
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
             if (descriptor != null) services.Remove(descriptor);
 
