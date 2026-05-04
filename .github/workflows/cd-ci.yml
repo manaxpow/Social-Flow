@@ -40,7 +40,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Development
           TESTCONTAINERS_RYUK_DISABLED: false
-        run: dotnet test --no-build --configuration Release --parallel 1 --collect:"XPlat Code Coverage" --results-directory ./TestResults
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults -- RunConfiguration.MaxCpuCount=1
 
       - name: Publish test results
         uses: actions/upload-artifact@v4
