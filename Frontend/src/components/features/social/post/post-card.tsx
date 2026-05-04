@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import {
   MoreHorizontal,
   Trash2,
@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserAvatarLink } from "@/components/common/user-link";
@@ -67,7 +67,7 @@ interface MediaGalleryProps {
   onImageClick: (mediaIndex: number) => void;
 }
 
-const MediaGallery = ({ mediaItems, post, onImageClick }: MediaGalleryProps) => {
+const MediaGallery = ({ mediaItems, onImageClick }: MediaGalleryProps) => {
   if (!mediaItems || mediaItems.length === 0) return null;
 
   if (mediaItems.length === 1) {

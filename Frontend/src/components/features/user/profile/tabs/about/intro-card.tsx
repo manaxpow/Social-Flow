@@ -13,7 +13,6 @@ interface IntroCardProps {
 }
 
 export const IntroCard = ({
-  name = "User Name",
   bio,
   location,
   website,

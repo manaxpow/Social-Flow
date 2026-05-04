@@ -8,9 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Send,
-  Smile,
-  Image as ImageIcon
+  Loader2,
 } from "lucide-react";
 import {
   Dialog,
@@ -19,12 +17,9 @@ import {
   VisuallyHidden,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { UserAvatarLink } from "@/components/common/user-link";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { PostDetailResponse } from "@/services/post/dtos/response/post-detail.response";
 import { getPostAvatar, getPostAuthorName } from "@/services/post/dtos/helpers/post-helpers";
@@ -60,7 +55,6 @@ export const PhotoDialog = ({
   initialMediaIndex = 0,
 }: PhotoDialogProps) => {
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const queryClient = useQueryClient();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(initialMediaIndex);
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -415,13 +409,6 @@ export const PhotoDialog = ({
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      action();
-    }
   };
 
   // Format numbers with K suffix

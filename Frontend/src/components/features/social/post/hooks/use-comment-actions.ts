@@ -38,7 +38,6 @@ export const useCommentActions = ({
       commentService.createComment({
         postId,
         content: params.content,
-        authorId: currentUser?.id ?? "",
         parentCommentId: params.parentCommentId ?? null,
       }),
     onSuccess: (result) => {

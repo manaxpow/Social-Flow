@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios/axios";
 
 export type CommentStatus = 'pending' | 'success' | 'error';
@@ -114,13 +113,12 @@ export const useComments = ({
   open,
   initialExpandedIds = new Set(),
 }: UseCommentsOptions): UseCommentsReturn => {
-  const queryClient = useQueryClient();
   const [comments, setComments] = useState<CommentWithReplies[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreLv1, setHasMoreLv1] = useState(false);
   const [lv1Page, setLv1Page] = useState(1);
-  const [expandedCommentIds, setExpandedCommentIds] = useState<Set<string>>(initialExpandedIds);
+  const [expandedCommentIds] = useState<Set<string>>(initialExpandedIds);
   const isCancelledRef = useRef(false);
   const initialLoadDoneRef = useRef(false);
 

@@ -41,7 +41,7 @@ export const CommentReplyItem = ({
   replyingTo,
   setReplyingTo,
   toggleNestedReplies,
-  loadNestedReplies,
+  loadNestedReplies: _loadNestedReplies,
 }: CommentReplyItemProps) => {
   const [localReplyText, setLocalReplyText] = useState("");
   const isReplying = replyingTo === reply.id;

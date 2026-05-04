@@ -20,7 +20,7 @@ export const MentionInput = ({
   onChange,
   placeholder,
   className,
-  mentionedUserIds,
+  mentionedUserIds: _mentionedUserIds,
   setMentionedUserIds,
 }: MentionInputProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -53,7 +53,7 @@ export const MentionInput = ({
 
   // Convert internal format to display format for rendering
   const getDisplayText = (text: string): string => {
-    return text.replace(/@\[([^\]]+)\]\(([^)]+)\)/g, (match, name) => `@${name}`);
+    return text.replace(/@\[([^\]]+)\]\(([^)]+)\)/g, (_match, name) => `@${name}`);
   };
 
   // Fetch friends with debounced search
