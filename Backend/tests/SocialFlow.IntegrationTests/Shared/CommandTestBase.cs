@@ -38,7 +38,11 @@ public abstract class CommandTestBase : IntegrationTestBase
             await Task.Delay(500); // Wait 500ms before checking again
         }
 
-        throw new TimeoutException("The background process did not complete within the expected time.");
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var outboxCount = await db.Set<OutboxMessage>().CountAsync();
+
+        throw new TimeoutException($"Timeout after {timeoutSeconds}s. Outbox messages remaining: {outboxCount}.");
     }
     protected async Task TriggerOutboxProcessingAsync()
     {
