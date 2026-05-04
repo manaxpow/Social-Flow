@@ -17,16 +17,19 @@ public class ProcessOutboxMessagesJob : IOutboxProcessor
 
     public async Task Process()
     {
+        _logger.LogInformation("[OUTBOX] Starting to process messages...");
         var messages = await _unitOfWork.OutboxMessages.GetUnpublishedMessagesAsync(20);
 
         if (messages == null || !messages.Any())
         {
+            _logger.LogInformation("[OUTBOX] No messages to process.");
             return;
         }
         foreach (var message in messages)
         {
             try
             {
+                _logger.LogInformation($"[OUTBOX] Processing message: {message.Id}");
                 var domainEvent = JsonConvert.DeserializeObject<IDomainEvent>(message.Content, new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.All
@@ -45,6 +48,8 @@ public class ProcessOutboxMessagesJob : IOutboxProcessor
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"[OUTBOX_ERROR] Message {message.Id} failed: {ex.Message}");
+
                 message.IncrementAttemptCount();
                 message.MarkAsFailed(DateTime.UtcNow);
                 message.UpdateError(ex.Message);

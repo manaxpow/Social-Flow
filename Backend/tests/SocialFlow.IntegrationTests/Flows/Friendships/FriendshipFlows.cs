@@ -28,7 +28,8 @@ public class FriendshipFlows : CommandTestBase
         var response = await SendRequestAsync($"/api/friendship/{receiver.Id}/request", new RequestFriendshipCommand(receiver.Id));
 
         response.EnsureSuccessStatusCode();
-        // 2. Trigger Outbox (Giả lập Cronjob)
+
+        await Task.Delay(1000);
         await TriggerOutboxProcessingAsync();
 
         await WaitForConditionAsync(async () =>
