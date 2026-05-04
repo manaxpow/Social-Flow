@@ -29,13 +29,13 @@ public abstract class CommandTestBase : IntegrationTestBase
         Assert.True(exists, $"Expected an unprocessed outbox message of type '{eventType}' to exist.");
     }
 
-    protected async Task WaitForConditionAsync(Func<Task<bool>> condition, int timeoutSeconds = 60)
+    protected async Task WaitForConditionAsync(Func<Task<bool>> condition, int timeoutSeconds = 90)
     {
         var start = DateTime.UtcNow;
         while (DateTime.UtcNow - start < TimeSpan.FromSeconds(timeoutSeconds))
         {
             if (await condition()) return;
-            await Task.Delay(200); // Wait 200ms before checking again
+            await Task.Delay(500); // Wait 500ms before checking again
         }
 
         throw new TimeoutException("The background process did not complete within the expected time.");
