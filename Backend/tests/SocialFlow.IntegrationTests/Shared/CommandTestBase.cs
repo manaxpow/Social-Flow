@@ -46,21 +46,19 @@ public abstract class CommandTestBase : IntegrationTestBase
     }
     protected async Task TriggerOutboxProcessingAsync()
     {
+        await WaitForConditionAsync(async () =>
+        {
+            using var scope = _factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            // Kiểm tra xem có tin nhắn nào chưa được xử lý không
+            return await db.Set<OutboxMessage>().AnyAsync(m => m.ProcessedAt == null);
+        }, timeoutSeconds: 10);
+
+        // Bước 2: Gọi Processor xử lý
         using (var scope = _factory.Services.CreateScope())
         {
             var processor = scope.ServiceProvider.GetRequiredService<IOutboxProcessor>();
             await processor.Process();
-        }
-
-        using (var checkScope = _factory.Services.CreateScope())
-        {
-            var db = checkScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            var processedCount = await db.OutboxMessages
-                .AsNoTracking()
-                .CountAsync(m => m.ProcessedAt != null);
-
-            Console.WriteLine($"[DB_CHECK] Total processed messages now: {processedCount}");
         }
     }
 }
