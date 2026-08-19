@@ -7,7 +7,7 @@ A high-performance social networking platform built with modern technologies, Cl
 ![React](https://img.shields.io/badge/React-19-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
 
-## 🚀 Features
+## Features
 
 - **Authentication** - JWT-based authentication with secure token management
 - **Posts & Media** - Create, edit, delete posts with image/video uploads
@@ -18,7 +18,9 @@ A high-performance social networking platform built with modern technologies, Cl
 - **Media Management** - Cloudinary integration for fast media uploads
 - **Background Processing** - Reliable event handling with Outbox Pattern
 
-## 🏗️ Architecture
+## Architecture
+
+![Technical Architecture](images/technical-architecture.png)
 
 ### Backend (.NET 10.0)
 
@@ -73,7 +75,7 @@ Frontend/
 - React Router 7
 - React Hook Form + Zod (Forms)
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **.NET 10.0 SDK** - [Download](https://dotnet.microsoft.com/download/dotnet/10.0)
 - **Node.js 20+** - [Download](https://nodejs.org/)
@@ -82,7 +84,7 @@ Frontend/
 - **PostgreSQL 15+** - [Download](https://postgresql.org/)
 - **Redis 7+** - [Download](https://redis.io/)
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### 1. Clone the Repository
 
@@ -156,7 +158,7 @@ VITE_API_URL=http://localhost:5000
 VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ### Backend Layers
 
@@ -179,7 +181,7 @@ VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
 | `pages/` | Page-level components |
 | `lib/` | Utilities, axios configuration |
 
-## 🔌 API Documentation
+## API Documentation
 
 Swagger is available when the API is running:
 
@@ -199,7 +201,7 @@ Swagger is available when the API is running:
 | POST | `/friendship/request` | Send friend request |
 | GET | `/media/setup-upload` | Get Cloudinary signature |
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 The project uses GitHub Actions for continuous integration and deployment:
 
@@ -215,7 +217,7 @@ The project uses GitHub Actions for continuous integration and deployment:
 - `RENDER_DEPLOY_HOOK` - Trigger Render deployment
 - `VERCEL_DEPLOY_HOOK` - Trigger Vercel deployment
 
-## 🧪 Testing
+## Testing
 
 ### Backend Tests
 
@@ -231,7 +233,7 @@ cd Frontend
 pnpm exec tsc --noEmit
 ```
 
-## 📚 Documentation
+## Documentation
 
 Detailed documentation is available in the `docs/` folder:
 
@@ -240,7 +242,7 @@ Detailed documentation is available in the `docs/` folder:
 - [Outbox Pattern](docs/architecture/outbox-pattern.md) - Event processing
 - [Use Cases](docs/usecases/) - Feature specifications
 
-## 🛡️ Security
+## Security
 
 - JWT token-based authentication
 - Password hashing with BCrypt
@@ -250,7 +252,7 @@ Detailed documentation is available in the `docs/` folder:
 - SQL injection prevention (EF Core)
 - XSS protection (React escaping)
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -258,11 +260,11 @@ Detailed documentation is available in the `docs/` folder:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [ASP.NET Core](https://learn.microsoft.com/aspnet/core)
 - [React](https://react.dev/)
