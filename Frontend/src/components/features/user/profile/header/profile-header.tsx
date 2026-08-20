@@ -123,7 +123,7 @@ export const ProfileHeader = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
+                  className="rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     coverUploadTriggerRef.current?.();
@@ -151,14 +151,14 @@ export const ProfileHeader = ({
 
       {/* 2. Action Buttons */}
       <div className="flex justify-end px-4 pt-6 pb-2 gap-2">
-        <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 transition-colors w-10 h-10">
-          <Settings className="h-6 w-6" />
+        <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-10 h-10 cursor-pointer">
+          <Settings className="h-5 w-5" />
         </Button>
-        <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 transition-colors w-10 h-10">
-          <MoreHorizontal className="h-6 w-6" />
+        <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-10 h-10 cursor-pointer">
+          <MoreHorizontal className="h-5 w-5" />
         </Button>
-        <Button className="rounded-full px-6 py-2 font-semibold bg-[#0061FF] hover:bg-[#0050DD] text-white transition-colors h-10">
-          <Edit className="h-6 w-6 mr-2" />
+        <Button className="rounded-full px-6 py-2 font-semibold bg-[#0061FF] hover:bg-[#0050DD] text-white transition-colors h-10 cursor-pointer">
+          <Edit className="h-4 w-4 mr-2" />
           Edit Profile
         </Button>
       </div>

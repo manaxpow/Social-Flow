@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
 
-interface Image {
+export interface ImageItem {
   id: string;
   url: string;
+  postId?: string;
 }
 
 interface ImagesPreviewProps {
-  images?: Image[];
+  images?: ImageItem[];
   totalImages?: number;
   onViewAll?: () => void;
   isLoading?: boolean;
@@ -20,6 +22,7 @@ export const ImagesPreview = ({
   isLoading = false
 }: ImagesPreviewProps) => {
   const displayImages = images.slice(0, 9);
+  const activeTotalCount = totalImages || images.length;
 
   const formatTotalImages = (count: number): string => {
     return count.toLocaleString();
@@ -35,7 +38,7 @@ export const ImagesPreview = ({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {Array.from({ length: 9 }).map((_, i) => (
               <Skeleton key={i} className="w-full aspect-square rounded-lg" />
             ))}
@@ -67,33 +70,46 @@ export const ImagesPreview = ({
           <h3 className="text-xl font-semibold">Photos</h3>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              {totalImages > 0 ? `${formatTotalImages(totalImages)} photos` : ""}
+              {activeTotalCount > 0 ? `${formatTotalImages(activeTotalCount)} photos` : ""}
             </span>
-            <button
-              onClick={onViewAll}
-              className="text-sm font-semibold text-[#0061FF] hover:underline transition-colors"
-            >
-              See all photos
-            </button>
+            {onViewAll && (
+              <button
+                onClick={onViewAll}
+                className="text-sm font-semibold text-[#0061FF] hover:underline transition-colors cursor-pointer"
+              >
+                See all photos
+              </button>
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-3">
-          {displayImages.map((image) => (
-            <div 
-              key={image.id} 
-              className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group cursor-pointer transition-transform duration-200 hover:scale-105"
-            >
-              <img 
-                src={image.url} 
-                alt="Photo" 
-                className="w-full h-full object-cover shadow-sm"
-              />
-            </div>
-          ))}
+        <div className="grid grid-cols-3 gap-2">
+          {displayImages.map((image) => {
+            const imgElement = (
+              <div 
+                className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group cursor-pointer transition-transform duration-200 hover:scale-105"
+              >
+                <img 
+                  src={image.url} 
+                  alt="Photo" 
+                  className="w-full h-full object-cover shadow-sm group-hover:opacity-90 transition-opacity"
+                />
+              </div>
+            );
+
+            if (image.postId) {
+              return (
+                <Link key={image.id} to={`/photo/${image.postId}`} className="block">
+                  {imgElement}
+                </Link>
+              );
+            }
+
+            return <div key={image.id}>{imgElement}</div>;
+          })}
         </div>
       </CardContent>
     </Card>
   );
-};
+};
