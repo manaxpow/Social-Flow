@@ -1,12 +1,16 @@
-import { MapPin, Link as LinkIcon, Calendar, Edit, Settings, UserPlus, MoreHorizontal, Camera } from "lucide-react";
+import { MapPin, Link as LinkIcon, Edit, Settings, MoreHorizontal, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AvatarUploader } from "./avatar-uploader";
 import { CoverUploader } from "./cover-uploader";
 import type { UserResponse } from "@/services/user/dtos/user.reponse";
 import type { PostDetailResponse } from "@/services/post/dtos/response/post-detail.response";
-import { useState, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  getGradientForUser,
+  getOptimizedCoverUrl,
+} from "../../../../common/helpers/profile/profile-header.helpers";
 
 interface ProfileHeaderProps {
   user?: UserResponse | null;
@@ -25,16 +29,6 @@ export const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const navigate = useNavigate();
 
-  // State for cover URL to update after upload
-  const [localCoverUrl, setLocalCoverUrl] = useState<string | undefined>(user?.coverUrl);
-
-  // Sync localCoverUrl when user.coverUrl changes (e.g., after upload)
-  useEffect(() => {
-    if (user?.coverUrl !== localCoverUrl) {
-      setLocalCoverUrl(user?.coverUrl);
-    }
-  }, [user?.coverUrl]);
-
   // Ref to trigger cover upload from camera button
   const coverUploadTriggerRef = useRef<(() => void) | null>(null);
 
@@ -42,46 +36,19 @@ export const ProfileHeader = ({
   const avatarUpdatePost = posts.find((p) => p.type === "avatarUpdate");
   const coverUpdatePost = posts.find((p) => p.type === "coverUpdate");
 
-  // Default cover gradients based on user ID
-  const DEFAULT_COVER_GRADIENTS = [
-    "from-blue-400 to-purple-600",
-    "from-green-400 to-cyan-600",
-    "from-orange-400 to-red-600",
-    "from-pink-400 to-rose-600",
-    "from-indigo-400 to-violet-600",
-    "from-teal-400 to-emerald-600",
-  ];
-
-  const getGradientForUser = (userId: string | undefined): string => {
-    if (!userId) return DEFAULT_COVER_GRADIENTS[0];
-    const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return DEFAULT_COVER_GRADIENTS[hash % DEFAULT_COVER_GRADIENTS.length];
-  };
-
-  // Optimize Cloudinary URL with f_auto,q_auto
-  const getOptimizedCoverUrl = (url: string | undefined): string | undefined => {
-    if (!url) return undefined;
-    return url.replace(
-      /https:\/\/res\.cloudinary\.com\/[^\/]+\/image\/upload\//,
-      (match) => match + "f_auto,q_auto/"
-    );
-  };
-
   // Map UserResponse to component variables
   const name = user?.fullName || "User Name";
-  const username = user?.email ? user.email.split('@')[0] : undefined;
   const avatarUrl = user?.avatarUrl;
-  const coverUrl = localCoverUrl ?? user?.coverUrl;
+  const coverUrl = user?.coverUrl;
   const optimizedCoverUrl = getOptimizedCoverUrl(coverUrl);
   const bio = user?.bio;
-  const joinedDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : undefined;
   const followingCount = user?.followingCount || 0;
   const followerCount = user?.followersCount || 0;
   const defaultGradient = getGradientForUser(user?.id);
 
   if (isLoading) {
     return (
-      <div className="max-w-[1600px] mx-auto bg-background">
+      <div className="max-w-400 mx-auto bg-background">
         {/* Cover Skeleton */}
         <div className="h-64 md:h-80 lg:h-96 bg-slate-200">
           <Skeleton className="w-full h-full" />
@@ -125,21 +92,20 @@ export const ProfileHeader = ({
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto bg-background pb-0">
+    <div className="max-w-400 mx-auto bg-background pb-0">
       {/* 1. Header & Cover Image with Gradient */}
       <div className="relative">
         <CoverUploader
-          onCoverUpdate={setLocalCoverUrl}
           onPreview={() => coverUpdatePost && navigate(`/post/${coverUpdatePost.id}`)}
           triggerUploadRef={coverUploadTriggerRef}
         >
           <div className="relative group">
-            <div className="h-80 md:h-96 lg:h-[500px] bg-slate-200 overflow-hidden">
+            <div className="h-80 md:h-96 lg:h-112 bg-slate-200 overflow-hidden">
               {/* Default Gradient (only when no cover image) */}
               {!coverUrl && (
-                <div className={`absolute inset-0 bg-gradient-to-r ${defaultGradient}`} />
+                <div className={`absolute inset-0 bg-linear-to-br ${defaultGradient}`} />
               )}
-              
+
               {/* Cover Image or Default Placeholder */}
               <img
                 src={optimizedCoverUrl ?? "https://images.unsplash.com/photo-1557683316-973673baf926"}
@@ -180,16 +146,12 @@ export const ProfileHeader = ({
       </div>
 
       {/* 2. Action Buttons */}
-      <div className="flex justify-end p-4 pt-10 gap-2">
+      <div className="flex justify-end px-4 pt-6 pb-2 gap-2">
         <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 transition-colors w-10 h-10">
           <Settings className="h-6 w-6" />
         </Button>
         <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 transition-colors w-10 h-10">
           <MoreHorizontal className="h-6 w-6" />
-        </Button>
-        <Button className="rounded-full px-6 py-2 font-semibold bg-[#00CFEE] hover:bg-[#00B8DD] text-white transition-colors h-10">
-          <UserPlus className="h-6 w-6 mr-2" />
-          Add to Story
         </Button>
         <Button className="rounded-full px-6 py-2 font-semibold bg-[#0061FF] hover:bg-[#0050DD] text-white transition-colors h-10">
           <Edit className="h-6 w-6 mr-2" />
@@ -198,21 +160,18 @@ export const ProfileHeader = ({
       </div>
 
       {/* 3. User Info */}
-      <div className="px-6 md:px-12 lg:px-16 mt-8 space-y-3 pb-6">
+      <div className="px-6 md:px-12 lg:px-16 mt-3 space-y-1.5 pb-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">{name}</h1>
-          {username && (
-            <p className="text-muted-foreground text-base">@{username}</p>
-          )}
         </div>
 
         {bio && (
           <p className="text-base leading-relaxed max-w-2xl">{bio}</p>
         )}
 
-        {/* Metadata (Location, Link, Join Date) */}
-        {(location || website || joinedDate) && (
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-base text-muted-foreground">
+        {/* Metadata (Location, Link Date) */}
+        {(location || website) && (
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-base text-muted-foreground">
             {location && (
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" /> {location}
@@ -221,11 +180,6 @@ export const ProfileHeader = ({
             {website && (
               <div className="flex items-center gap-1 text-primary hover:underline cursor-pointer">
                 <LinkIcon className="h-4 w-4" /> {website}
-              </div>
-            )}
-            {joinedDate && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" /> {joinedDate}
               </div>
             )}
           </div>

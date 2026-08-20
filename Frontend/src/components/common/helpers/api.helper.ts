@@ -45,3 +45,30 @@ export const handleApiError = <T>(error: unknown): ApiResponse<T> => {
     status: status,
   };
 };
+
+/**
+ * Safely extracts a human-readable error message from any unknown error shape.
+ * Handles Axios response errors, plain Error objects, and primitive strings.
+ *
+ * @param error   - The caught error value (unknown type)
+ * @param context - Optional label prepended to the console log (e.g. "updateAvatar")
+ */
+export const getErrorMessage = (error: unknown, context: string = ""): string => {
+  console.error(`[${context || "App"}]`, error);
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const e = error as Record<string, unknown>;
+    const resp = e.response as Record<string, unknown> | undefined;
+    if (resp) {
+      const data = resp.data as Record<string, unknown> | undefined;
+      if (typeof data?.detail === "string") return data.detail;
+      if (typeof data?.message === "string") return data.message;
+      if (typeof data?.title === "string") return data.title;
+      if (typeof resp.statusText === "string") return resp.statusText;
+    }
+    if (typeof e.message === "string") return e.message;
+    if (typeof e.detail === "string") return e.detail;
+    if (typeof e.title === "string") return e.title;
+  }
+  return "Có lỗi xảy ra. Vui lòng thử lại sau.";
+};
