@@ -141,6 +141,16 @@ export const ClientProfilePage = () => {
         videosCount={videosCount}
       />
 
+      {/* Tab Navigation */}
+      <TabNavigation
+        value={activeTab}
+        onValueChange={handleTabChange}
+        postsCount={postsCount}
+        friendsCount={friendsCount}
+        photosCount={photosCount}
+        videosCount={videosCount}
+      />
+
       {/* Profile Content */}
       <div className="mt-6 px-4 lg:px-0">
         {activeTab === "posts" && (
