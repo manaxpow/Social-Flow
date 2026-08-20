@@ -29,6 +29,18 @@ export function getMediaCount(post: PostDetailResponse, type?: 'Image' | 'Video'
   return post.mediaItems.filter(m => m.mediaType === type).length;
 }
 
+export function getPostActionText(type?: string | number): string | null {
+  if (!type) return null;
+  const typeStr = String(type).toLowerCase();
+  if (typeStr === "avatarupdate" || typeStr === "avatar" || typeStr === "1") {
+    return "đã cập nhật ảnh đại diện.";
+  }
+  if (typeStr === "coverupdate" || typeStr === "cover" || typeStr === "2") {
+    return "đã cập nhật ảnh bìa.";
+  }
+  return null;
+}
+
 /**
  * Helper để flatten media từ nhiều posts thành array
  */

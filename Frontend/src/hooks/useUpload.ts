@@ -4,10 +4,10 @@ import { mediaService } from "@/services/media/media.service";
 export interface UploadResult {
   secure_url: string;
   public_id: string;
-  format: string;
-  width: number;
-  height: number;
-  bytes: number;
+  format?: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
 }
 
 interface UseUploadReturn {
@@ -65,10 +65,9 @@ export const useUpload = (): UseUploadReturn => {
         return {
           secure_url: data.secure_url,
           public_id: data.public_id,
-          format: data.format,
-          width: data.width,
-          height: data.height,
-          bytes: data.bytes,
+          format: data.format ?? "",
+          width: data.width ?? 0,
+          height: data.height ?? 0,
         };
       } catch (err) {
         const errorMessage =

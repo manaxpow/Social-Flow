@@ -20,6 +20,43 @@ interface ProfileHeaderProps {
   posts?: PostDetailResponse[];
 }
 
+export const ProfileHeaderSkeleton = () => {
+  return (
+    <div className="max-w-400 mx-auto bg-background">
+      {/* Cover Skeleton */}
+      <div className="h-64 md:h-80 lg:h-96 bg-slate-200">
+        <Skeleton className="w-full h-full" />
+      </div>
+
+      {/* Avatar Skeleton */}
+      <div className="relative -bottom-20 left-6 md:left-12 ring-4 ring-background rounded-full overflow-hidden">
+        <Skeleton className="w-36 h-36 md:w-48 md:h-48" />
+      </div>
+
+      {/* Action Buttons Skeleton */}
+      <div className="flex justify-end p-4 pt-6 gap-2">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-10 w-36 rounded-full" />
+        <Skeleton className="h-10 w-36 rounded-full" />
+      </div>
+
+      {/* User Info Skeleton */}
+      <div className="px-6 mt-8 space-y-4">
+        <div className="space-y-1">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <Skeleton className="h-16 w-full" />
+        <div className="flex gap-6">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ProfileHeader = ({
   user,
   location,
@@ -47,40 +84,7 @@ export const ProfileHeader = ({
   const defaultGradient = getGradientForUser(user?.id);
 
   if (isLoading) {
-    return (
-      <div className="max-w-400 mx-auto bg-background">
-        {/* Cover Skeleton */}
-        <div className="h-64 md:h-80 lg:h-96 bg-slate-200">
-          <Skeleton className="w-full h-full" />
-        </div>
-
-        {/* Avatar Skeleton */}
-        <div className="relative -bottom-20 left-6 md:left-12 ring-4 ring-background rounded-full overflow-hidden">
-          <Skeleton className="w-36 h-36 md:w-48 md:h-48" />
-        </div>
-
-        {/* Action Buttons Skeleton */}
-        <div className="flex justify-end p-4 pt-6 gap-2">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <Skeleton className="h-10 w-36 rounded-full" />
-          <Skeleton className="h-10 w-36 rounded-full" />
-        </div>
-
-        {/* User Info Skeleton */}
-        <div className="px-6 mt-8 space-y-4">
-          <div className="space-y-1">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-          <Skeleton className="h-16 w-full" />
-          <div className="flex gap-6">
-            <Skeleton className="h-5 w-24" />
-            <Skeleton className="h-5 w-24" />
-          </div>
-        </div>
-      </div>
-    );
+    return <ProfileHeaderSkeleton />;
   }
 
   // Format follower count (e.g., 48.5k)
@@ -100,7 +104,7 @@ export const ProfileHeader = ({
           triggerUploadRef={coverUploadTriggerRef}
         >
           <div className="relative group">
-            <div className="h-80 md:h-96 lg:h-112 bg-slate-200 overflow-hidden">
+            <div className="h-40 md:h-60 lg:h-100 bg-slate-200 overflow-hidden rounded-b-xl border-b-2 border-slate-300 dark:border-slate-700 shadow-md">
               {/* Default Gradient (only when no cover image) */}
               {!coverUrl && (
                 <div className={`absolute inset-0 bg-linear-to-br ${defaultGradient}`} />
@@ -135,11 +139,11 @@ export const ProfileHeader = ({
         </CoverUploader>
 
         {/* Avatar - Positioned outside CoverUploader to avoid hover conflict */}
-        <div className="absolute -bottom-20 left-6 md:left-12 ring-4 ring-background rounded-full group/avatar z-10">
+        <div className="absolute -bottom-20 left-6 md:left-12 ring-4 ring-[#1877f2] dark:ring-blue-500 rounded-full group/avatar z-10 shadow-2xl transition-all duration-300 hover:scale-105">
           <AvatarUploader
             currentAvatar={avatarUrl ?? undefined}
             initials={name?.[0]?.toUpperCase() ?? "U"}
-            size="large"
+            size="medium"
             onPreview={() => avatarUpdatePost && navigate(`/post/${avatarUpdatePost.id}`)}
           />
         </div>

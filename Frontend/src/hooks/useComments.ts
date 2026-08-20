@@ -21,7 +21,7 @@ export interface ReplyItem {
   isEdited?: boolean;
   media?: CommentMedia;
   isParentDeleted?: boolean;
-  status?: CommentStatus;  // NEW: pending/success/error
+  status?: CommentStatus;
 }
 
 export interface CommentMedia {
@@ -46,7 +46,7 @@ export interface CommentWithReplies {
   isEdited?: boolean;
   media?: CommentMedia;
   isParentDeleted?: boolean;
-  isPending?: boolean;  // NEW: for skeleton/pending state
+  isPending?: boolean;
 }
 
 interface UseCommentsOptions {
@@ -107,6 +107,9 @@ const transformReplies = (replies: any[]): ReplyItem[] => {
 
 const REPLY_PAGE_SIZE = 10;
 
+/**
+ * Custom hook for loading, expanding, editing, and deleting comments/replies for a post.
+ */
 export const useComments = ({
   postId,
   postCommentCount,
@@ -138,7 +141,6 @@ export const useComments = ({
     setIsLoadingComments(true);
     try {
       const commentCount = postCommentCount || 0;
-      // Always load 10 comments for pagination - backend requires pageSize >= 10
       const pageSize = 10;
 
       const response = await api.get(`/comment/post/${postId}/top-level`, {
@@ -149,7 +151,6 @@ export const useComments = ({
       const data = response.data ?? { items: [], hasNext: false };
       const topLevelComments = data.items || [];
 
-      // Check if there are more comments
       setHasMoreLv1(data.hasNext ?? false);
       setLv1Page(1);
 
@@ -160,9 +161,7 @@ export const useComments = ({
         return;
       }
 
-      // Only fetch replies if comment count is ≤ 10 (we're showing all)
       if (commentCount <= 10) {
-        // Fetch replies for each comment in parallel
         const commentsWithReplies = await Promise.all(
           topLevelComments.map(async (item: any) => {
             const replies: ReplyItem[] = [];
@@ -175,7 +174,6 @@ export const useComments = ({
                 const repliesData = repliesResponse.data ?? { items: [] };
                 const fetchedReplies = transformReplies(repliesData.items || []);
 
-                // Only fetch level 2 replies if they exist
                 for (const reply of fetchedReplies) {
                   if ((reply.replyCount ?? 0) > 0) {
                     try {
@@ -229,7 +227,6 @@ export const useComments = ({
         if (isCancelledRef.current) return;
         setComments(commentsWithReplies);
       } else {
-        // For > 10 comments, don't fetch replies yet (will load on demand)
         if (isCancelledRef.current) return;
         setComments(
           topLevelComments.map((item: any) => ({
@@ -265,7 +262,6 @@ export const useComments = ({
     }
   }, [postId, postCommentCount]);
 
-  // Load more Lv1 comments for infinite scroll
   const loadMoreLv1Comments = useCallback(async () => {
     if (!hasMoreLv1 || isLoadingMore) return;
 
@@ -310,7 +306,6 @@ export const useComments = ({
     }
   }, [hasMoreLv1, isLoadingMore, lv1Page, postId]);
 
-  // Load replies for a comment (always paginated, 10 per page)
   const loadReplies = useCallback(
     async (commentId: string) => {
       const comment = comments.find((c) => c.id === commentId);
@@ -340,7 +335,6 @@ export const useComments = ({
     [comments, postId]
   );
 
-  // Load nested replies for a reply (level 2) - also paginated
   const loadNestedReplies = useCallback(
     async (replyId: string) => {
       const reply = comments.flatMap((c) => c.replies || []).find((r) => r.id === replyId);
@@ -376,7 +370,6 @@ export const useComments = ({
     [comments, postId]
   );
 
-  // Toggle replies visibility for a comment - only fetch when showing and not yet loaded
   const toggleReplies = useCallback(
     (commentId: string) => {
       const comment = comments.find((c) => c.id === commentId);
@@ -393,16 +386,13 @@ export const useComments = ({
         })
       );
 
-      // Only fetch when showing AND not yet loaded
       if (willShow && (!comment.replies || comment.replies.length === 0)) {
         loadReplies(commentId);
       }
-      // When hiding, only toggle UI - no fetch
     },
     [comments, loadReplies]
   );
 
-  // Toggle nested replies visibility for a reply (level 2)
   const toggleNestedReplies = useCallback(
     (replyId: string) => {
       const reply = comments.flatMap((c) => c.replies || []).find((r) => r.id === replyId);
@@ -425,29 +415,23 @@ export const useComments = ({
         })
       );
 
-      // Fetch nested replies if showing and not yet loaded
       if (willShow && (!reply.nestedReplies || reply.nestedReplies.length === 0)) {
         loadNestedReplies(replyId);
       }
-      // Note: When hiding, we only toggle state locally - no reload needed
     },
     [comments, loadNestedReplies]
   );
 
-  // Delete a comment - promotes children up one level
   const deleteComment = useCallback(
     async (commentId: string) => {
       try {
         await api.delete(`/comment/${commentId}`);
-        
+
         setComments((prev) => {
-          // Collect promoted comments to add at top level
           const promoted: CommentWithReplies[] = [];
 
           const remaining = prev.map((c) => {
-            // If deleting a level 1 comment
             if (c.id === commentId) {
-              // Promote replies to level 1 with isParentDeleted flag
               if (c.replies && c.replies.length > 0) {
                 c.replies.forEach((r) => {
                   promoted.push({
@@ -469,17 +453,15 @@ export const useComments = ({
                   });
                 });
               }
-              return null; // Remove the comment entirely
+              return null;
             }
 
-            // If deleting a level 2 comment (reply)
             if (c.replies) {
               const replyIndex = c.replies.findIndex((r) => r.id === commentId);
               if (replyIndex !== -1) {
                 const deletedReply = c.replies[replyIndex];
                 const updatedReplies = c.replies.filter((r) => r.id !== commentId);
 
-                // If deleted reply has nested replies, promote them to Lv1 with isParentDeleted
                 if (deletedReply.nestedReplies && deletedReply.nestedReplies.length > 0) {
                   deletedReply.nestedReplies.forEach((nr) => {
                     promoted.push({
@@ -505,7 +487,6 @@ export const useComments = ({
                 return { ...c, replies: updatedReplies };
               }
 
-              // If deleting a level 3 comment (nested reply)
               for (const reply of c.replies) {
                 if (reply.nestedReplies) {
                   const nestedIndex = reply.nestedReplies.findIndex((nr) => nr.id === commentId);
@@ -522,19 +503,15 @@ export const useComments = ({
                 }
               }
             }
-          return c;
-        }).filter((c) => c !== null) as CommentWithReplies[];
+            return c;
+          }).filter((c) => c !== null) as CommentWithReplies[];
 
-          // Find position of first deleted comment to insert promoted there
           const deletedIndex = prev.findIndex((c) => c.id === commentId);
           if (deletedIndex !== -1) {
-            // Insert promoted comments at the position of the deleted comment
             const before = prev.slice(0, deletedIndex);
             const after = prev.slice(deletedIndex + 1);
             return [...before, ...promoted, ...after];
           }
-          // Fallback: if comment not found in level 1, check level 2 (replies)
-          // For replies deletion, promoted should stay in place (they become siblings)
           return remaining;
         });
       } catch (err) {
@@ -545,12 +522,11 @@ export const useComments = ({
     []
   );
 
-  // Edit a comment
   const editComment = useCallback(
     async (commentId: string, newContent: string) => {
       try {
         await api.patch(`/comment/${commentId}`, { content: newContent });
-        
+
         setComments((prev) =>
           prev.map((c) => {
             if (c.id === commentId) {
@@ -585,22 +561,19 @@ export const useComments = ({
     []
   );
 
-  // Delete a reply (lv2 or lv3)
   const deleteReply = useCallback(
     async (replyId: string) => {
       try {
         await api.delete(`/comment/${replyId}`);
-        
+
         setComments((prev) =>
           prev.map((c) => {
-            // Check Lv2 replies
             if (c.replies) {
               const replyIndex = c.replies.findIndex((r) => r.id === replyId);
               if (replyIndex !== -1) {
                 const deletedReply = c.replies[replyIndex];
                 const updatedReplies = c.replies.filter((r) => r.id !== replyId);
-                
-                // Promote Lv3 replies if any
+
                 if (deletedReply.nestedReplies && deletedReply.nestedReplies.length > 0) {
                   const promotedNested = deletedReply.nestedReplies.map((nr) => ({
                     ...nr,
@@ -610,11 +583,10 @@ export const useComments = ({
                   }));
                   updatedReplies.push(...promotedNested);
                 }
-                
+
                 return { ...c, replies: updatedReplies };
               }
-              
-              // Check Lv3 replies (nestedReplies)
+
               for (const reply of c.replies) {
                 if (reply.nestedReplies) {
                   const nestedIndex = reply.nestedReplies.findIndex((nr) => nr.id === replyId);
@@ -642,12 +614,11 @@ export const useComments = ({
     []
   );
 
-  // Edit a reply
   const editReply = useCallback(
     async (replyId: string, newContent: string) => {
       try {
         await api.patch(`/comment/${replyId}`, { content: newContent });
-        
+
         setComments((prev) =>
           prev.map((c) => {
             if (c.replies) {
@@ -679,19 +650,9 @@ export const useComments = ({
     []
   );
 
-  // Increment total comment count for the post (handled by parent component via state)
-  const incrementCommentCount = useCallback(() => {
-    // This is a no-op in the hook - parent manages total count
-    // Kept for API consistency
-  }, []);
+  const incrementCommentCount = useCallback(() => {}, []);
+  const decrementCommentCount = useCallback(() => {}, []);
 
-  // Decrement total comment count for the post (handled by parent component via state)
-  const decrementCommentCount = useCallback(() => {
-    // This is a no-op in the hook - parent manages total count
-    // Kept for API consistency
-  }, []);
-
-  // Increment reply count for a specific comment
   const incrementReplyCount = useCallback(
     (commentId: string) => {
       setComments((prev) =>
@@ -699,7 +660,6 @@ export const useComments = ({
           if (c.id === commentId) {
             return { ...c, replyCount: (c.replyCount ?? 0) + 1 };
           }
-          // Also update nested comments (Lv2)
           if (c.replies) {
             const updatedReplies = c.replies.map((r) => {
               if (r.id === commentId) {
@@ -716,7 +676,6 @@ export const useComments = ({
     []
   );
 
-  // Decrement reply count for a specific comment
   const decrementReplyCount = useCallback(
     (commentId: string) => {
       setComments((prev) =>
@@ -724,7 +683,6 @@ export const useComments = ({
           if (c.id === commentId) {
             return { ...c, replyCount: Math.max(0, (c.replyCount ?? 0) - 1) };
           }
-          // Also update nested comments (Lv2)
           if (c.replies) {
             const updatedReplies = c.replies.map((r) => {
               if (r.id === commentId) {

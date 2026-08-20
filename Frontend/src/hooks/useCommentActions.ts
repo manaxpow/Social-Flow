@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { commentService } from "@/services/comment/comment.service";
-import type { ReplyItem, CommentWithReplies } from "./use-comments";
+import type { ReplyItem, CommentWithReplies } from "@/hooks/useComments";
 
 interface UseCommentActionsOptions {
   postId: string;
@@ -22,6 +22,9 @@ interface UseCommentActionsReturn {
   isPending: boolean;
 }
 
+/**
+ * Custom hook for handling comment and reply creation mutations.
+ */
 export const useCommentActions = ({
   postId,
   currentUser,
@@ -41,8 +44,6 @@ export const useCommentActions = ({
         parentCommentId: params.parentCommentId ?? null,
       }),
     onSuccess: (result) => {
-      console.log("[CreateComment] onSuccess result:", result);
-
       if (result.isSuccess && result.data) {
         const newReply: ReplyItem = {
           id: result.data.id,
@@ -65,7 +66,6 @@ export const useCommentActions = ({
           setReplyText("");
           setReplyingTo(null);
 
-          // Add the new reply to the correct location (level 1 or level 2)
           setComments((prev) => {
             for (const comment of prev) {
               if (comment.replies) {
@@ -121,7 +121,6 @@ export const useCommentActions = ({
           queryClient.invalidateQueries({ queryKey: ["comment-replies", replyingTo] });
         } else {
           setCommentText("");
-          console.log("[CreateComment] New comment data:", result.data);
 
           const newComment: CommentWithReplies = {
             id: result.data.id,
@@ -132,7 +131,6 @@ export const useCommentActions = ({
             authorAvatarUrl: result.data.author?.avatarUrl || currentUser?.avatarUrl || null,
             createdAt: result.data.createdAt || new Date().toISOString(),
           };
-          console.log("[CreateComment] Adding new comment:", newComment);
           setComments((prev) => [newComment, ...prev]);
         }
         queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -140,10 +138,6 @@ export const useCommentActions = ({
         queryClient.invalidateQueries({ queryKey: ["post-comments", postId] });
         toast.success(replyingTo ? "Đã gửi phản hồi" : "Đã gửi bình luận");
       } else {
-        console.error(
-          "[CreateComment] onSuccess called but result.isSuccess is false or result.data is null:",
-          result
-        );
         const errors = result.error?.errors as string[] | undefined;
         if (errors && errors.length > 0) {
           toast.error(errors[0]);
@@ -153,7 +147,6 @@ export const useCommentActions = ({
       }
     },
     onError: (error) => {
-      console.error("[CreateComment] onError:", error);
       const errors = (error as any)?.error?.errors as string[] | undefined;
       if (errors && errors.length > 0) {
         toast.error(errors[0]);

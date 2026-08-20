@@ -23,20 +23,10 @@ import { toast } from "sonner";
 import api from "@/lib/axios/axios";
 import type { PostDetailResponse } from "@/services/post/dtos/response/post-detail.response";
 import { getPostAvatar, getPostAuthorName } from "@/services/post/dtos/helpers/post-helpers";
-import { useComments } from "./hooks/use-comments";
-import type { CommentWithReplies } from "./hooks/use-comments";
+import { useComments, type CommentWithReplies } from "@/hooks/useComments";
 import { CommentInputField } from "./components/comment-input-field";
 import { CommentItem } from "./components/comment-item/index";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/vi";
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(relativeTime);
-dayjs.locale("vi");
+import { formatPostDate, formatRelativeTime as formatDate } from "@/utils/date";
 
 interface PostDetailDialogProps {
   open: boolean;
@@ -71,14 +61,6 @@ export const PostDetailDialog = ({
   };
 
   const mediaItems = post.mediaItems || [];
-
-  const formatPostDate = (date: string) => {
-    return dayjs.utc(date).tz("Asia/Ho_Chi_Minh").fromNow();
-  };
-
-  const formatDate = (date: string) => {
-    return dayjs.utc(date).tz("Asia/Ho_Chi_Minh").fromNow();
-  };
 
   const authorName = getPostAuthorName(post);
   const authorAvatar = getPostAvatar(post);
@@ -426,7 +408,7 @@ export const PostDetailDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="!max-w-4xl w-[33vw] max-h-[95vh] p-0 gap-0 overflow-hidden !rounded-xl"
+        className="w-[95vw] sm:w-full sm:max-w-[760px] md:max-w-[880px] lg:max-w-[980px] max-h-[92vh] p-0 gap-0 overflow-hidden !rounded-xl"
         showCloseButton={true}
       >
         <VisuallyHidden asChild>
@@ -484,36 +466,78 @@ export const PostDetailDialog = ({
                 </div>
               )}
 
-              {/* Image Grid */}
-              {mediaItems.length > 0 && (
-                <div
-                  className={`grid ${getGridLayoutClass(mediaItems.length)} gap-1 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800`}
-                >
-                  {mediaItems.slice(0, 4).map((media, index) => (
+              {/* Image Grid / Media Display */}
+              {mediaItems.length > 0 && (() => {
+                const isAvatarUpdate = post.type && String(post.type).toLowerCase().includes("avatar");
+                
+                if (isAvatarUpdate) {
+                  return (
+                    <div className="py-6 flex justify-center border-y border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 rounded-xl">
+                      <div
+                        className="w-56 h-56 sm:w-72 sm:h-72 rounded-full overflow-hidden border-4 border-background ring-4 ring-[#1877f2]/30 dark:ring-blue-500/40 shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                        onClick={() => {
+                          setSelectedMediaIndex(0);
+                          setPhotoDialogOpen(true);
+                        }}
+                      >
+                        <img
+                          src={mediaItems[0].url}
+                          alt="Ảnh đại diện"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (mediaItems.length === 1) {
+                  return (
                     <div
-                      key={media.id || index}
-                      className="relative overflow-hidden bg-black/5 aspect-square cursor-pointer"
+                      className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-center cursor-pointer max-h-[550px]"
                       onClick={() => {
-                        setSelectedMediaIndex(index);
+                        setSelectedMediaIndex(0);
                         setPhotoDialogOpen(true);
                       }}
                     >
                       <img
-                        src={media.url}
-                        alt={`Media ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        src={mediaItems[0].url}
+                        alt="Ảnh bài viết"
+                        className="max-w-full h-auto object-contain max-h-[550px] hover:opacity-95 transition-opacity"
                       />
-                      {index === 3 && mediaItems.length > 4 && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <span className="text-white text-2xl font-bold">
-                            +{mediaItems.length - 4}
-                          </span>
-                        </div>
-                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                }
+
+                return (
+                  <div
+                    className={`grid ${getGridLayoutClass(mediaItems.length)} gap-1.5 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800`}
+                  >
+                    {mediaItems.slice(0, 4).map((media, index) => (
+                      <div
+                        key={media.id || index}
+                        className="relative overflow-hidden bg-black/5 h-48 sm:h-60 cursor-pointer"
+                        onClick={() => {
+                          setSelectedMediaIndex(index);
+                          setPhotoDialogOpen(true);
+                        }}
+                      >
+                        <img
+                          src={media.url}
+                          alt={`Media ${index + 1}`}
+                          className="w-full h-full object-cover hover:opacity-95 transition-opacity"
+                        />
+                        {index === 3 && mediaItems.length > 4 && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <span className="text-white text-2xl font-bold">
+                              +{mediaItems.length - 4}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
 
               {/* Photo Dialog */}
               <PhotoDialog

@@ -107,7 +107,7 @@ export const AvatarUploader = ({
       <div className="relative group">
         {/* Avatar preview — click opens the post preview */}
         <div
-          className={`relative cursor-pointer rounded-full border-4 border-background shadow-lg ${avatarSizeClass}`}
+          className={`relative cursor-pointer rounded-full border-4 border-background ring-4 ring-primary/30 hover:ring-primary shadow-xl transition-all duration-300 ${avatarSizeClass}`}
           onClick={() => onPreview?.()}
         >
           <Avatar className="w-full h-full">
