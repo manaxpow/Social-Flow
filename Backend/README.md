@@ -1,280 +1,178 @@
-# SocialFlow Backend
+# SocialFlow Backend API Documentation
 
-A modern social media backend API built with .NET 10.0, featuring real-time notifications, messaging, and clean architecture principles.
+Hệ thống API RESTful của SocialFlow Backend được xây dựng trên nền tảng .NET 9 Web API theo kiến trúc Clean Architecture & CQRS Pattern (MediatR). Tài liệu này bao gồm danh sách đầy đủ tất cả các tính năng từ Architecture Feature Map.
 
-## Tech Stack
+---
+
+## Tổng Quan & Cấu Hình
+
+- **Base URL**: `/api` (Ví dụ: `http://localhost:5000/api` hoặc `https://api.socialflow.com/api`)
+- **Authentication**: JWT Cookie Authentication (`accessToken` Cookie 15 phút, `refreshToken` Cookie 7 ngày)
+- **Response Format**: Standard JSON response hoặc `ProblemDetails` (khi gặp lỗi)
 
-- **.NET 10.0** - Core framework
-- **PostgreSQL** - Primary database
-- **Redis** - Caching and session management
-- **Entity Framework Core** - ORM
-- **SignalR** - Real-time communication
-- **Hangfire** - Background job processing
-- **Serilog** - Structured logging
-- **MediatR** - CQRS pattern implementation
-- **JWT** - Authentication
+---
 
-## Prerequisites
+## Bảng Quản Lý Tiến Độ Dự Án (Progress Tracking)
 
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Docker & Docker Compose](https://www.docker.com/get-started) (for infrastructure services)
-- PostgreSQL (if not using Docker)
-- Redis (if not using Docker)
-- PowerShell (Windows) or bash (Linux/Mac)
+| Module / Feature | Priority | Status | Progress | Content / Target |
+|---|---|---|---|---|
+| Authentication (`/api/auth`) | `High` | `Completed` | 100% | Login, Register, JWT Cookies, Refresh Token, Reset Password, Confirm Email |
+| User Profile (`/api/user`) | `High` | `Completed` | 100% | Xem & Cập nhật hồ sơ, Ảnh đại diện (Avatar), Ảnh bìa (Cover) |
+| Posts & News Feed (`/api/post`) | `High` | `Completed` | 100% | CRUD Bài viết, Phân trang bài viết cá nhân, Đính kèm Media & Mention |
+| Comments (`/api/comment`) | `High` | `Completed` | 100% | Cây bình luận đa cấp (Closure Table), Top-level comments, Replies, CRUD Comment |
+| Reactions (`/api/reaction`) | `High` | `Completed` | 100% | Thả cảm xúc, Đổi loại cảm xúc & Gỡ cảm xúc cho Bài viết/Bình luận |
+| Social Graph & Friendships (`/api/friendship`) | `High` | `Completed` | 100% | Danh sách bạn bè, Gửi/Nhận/Hủy lời mời kết bạn, Hủy kết bạn, Chặn người dùng |
+| Media & Upload (`/api/media`) | `High` | `Completed` | 100% | Lấy chữ ký tải tệp Cloudinary (Setup Upload) & Xóa tệp Media |
+| Notifications & Presence (`/api/notification`) | `Medium` | `Pending` | 0% | Thông báo thời gian thực (SignalR), Trạng thái Online / Last Seen, Unread Counter |
+| Messaging & Real-time Chat (`/api/chat`) | `Medium` | `Pending` | 0% | Trò chuyện 1-1, Chat nhóm, Tin nhắn Media, Typing Indicator, Read Receipts |
+| Groups (`/api/group`) | `Medium` | `Pending` | 0% | Tạo nhóm, Quản lý thành viên, Phân quyền, Bài viết trong nhóm, Duyệt bài |
+| Search & Discovery (`/api/search`) | `Medium` | `Pending` | 0% | Tìm kiếm Người dùng/Bài viết/Nhóm, Gợi ý kết bạn (People You May Know) |
+| Stories (`/api/story`) | `Low` | `Pending` | 0% | Tạo tin (24h), Xem danh sách Story, Người xem Story, Phản hồi Story |
+| Voice & Video Calls (`/api/call`) | `Low` | `Pending` | 0% | Cuộc gọi thoại & video WebRTC, Lịch sử cuộc gọi, Mute/Camera Control |
 
-## Getting Started
+---
 
-### 1. Clone the Repository
+## Danh Sách API (Endpoints)
 
-```bash
-git clone <repository-url>
-cd SocialFlow/Backend
-```
+### 1. Authentication (`/api/auth`)
 
-### 2. Setup Infrastructure
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `POST` | `/api/auth/login` | *None* | *None* | `{ email, password }` |
+| `High` | `POST` | `/api/auth/register` | *None* | *None* | `{ email, password, firstName, lastName, dateOfBirth, gender, bio? }` |
+| `High` | `POST` | `/api/auth/refresh-token` | *None* | *None* | *None* (Đọc từ Cookie `refreshToken`) |
+| `High` | `POST` | `/api/auth/logout` | *None* | *None* | *None* |
+| `Medium` | `POST` | `/api/auth/forgot-password` | *None* | *None* | `{ email }` |
+| `Medium` | `POST` | `/api/auth/reset-password` | *None* | *None* | `{ userId, password, token }` |
+| `Low` | `POST` | `/api/auth/confirm-email` | *None* | *None* | `{ userId, token }` |
+| `Low` | `POST` | `/api/auth/resend-confirmation` | *None* | *None* | `{ email }` |
 
-#### Option A: Using Docker Compose (Recommended)
+---
 
-```bash
-docker-compose -f docker-compose.infra.yml up -d
-```
+### 2. User Profile (`/api/user`)
 
-This will start:
-- PostgreSQL on port 5432
-- Redis on port 6379
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/user/me` | *None* | *None* | *None* |
+| `High` | `POST` | `/api/user/avatar` | *None* | *None* | `{ avatarUrl, mediaType, publicId }` |
+| `High` | `PATCH` | `/api/user/profile` | *None* | *None* | `{ firstName, lastName, bio, dateOfBirth, gender, location, website }` |
+| `Medium` | `GET` | `/api/user/{id}` | `id` (Guid) | *None* | *None* |
+| `Medium` | `POST` | `/api/user/cover` | *None* | *None* | `{ coverUrl, mediaType, publicId }` |
 
-#### Option B: Manual Setup
+---
 
-If you prefer to run PostgreSQL and Redis locally:
-- Install PostgreSQL and create a database named `SocialFlow`
-- Install Redis and ensure it's running on port 6379
+### 3. Posts & News Feed (`/api/post`)
 
-### 3. Configure Connection Strings
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/post/my-posts` | *None* | `pageNumber` (int, default: 1)<br>`pageSize` (int, default: 10) | *None* |
+| `High` | `POST` | `/api/post` | *None* | *None* | `{ content?, media?, sharedPostId?, mentionedUserIds? }` |
+| `High` | `DELETE` | `/api/post/{id}` | `id` (Guid) | *None* | *None* |
+| `Medium` | `GET` | `/api/post/{id}` | `id` (Guid) | *None* | *None* |
+| `Medium` | `PATCH` | `/api/post/{id}` | `id` (Guid) | *None* | `{ content?, media?, mentionedUserIds? }` |
 
-Update the connection strings in `src/Api/appsettings.Development.json`:
+---
 
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Host=localhost;Port=5432;Database=SocialFlow;Username=postgres;Password=your_password",
-  "Redis": "localhost:6379,password=your_redis_password,abortConnect=false"
-}
-```
+### 4. Comments (`/api/comment`)
 
-### 4. Database Migrations
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/comment/post/{postId}/top-level` | `postId` (Guid) | `parentCommentId` (Guid?, optional)<br>`pageNumber` (int, default: 1)<br>`pageSize` (int, default: 10) | *None* |
+| `High` | `POST` | `/api/comment` | *None* | *None* | `{ postId, parentCommentId?, content?, media?, mentionedUserIds? }` |
+| `Medium` | `GET` | `/api/comment/{commentId}/replies` | `commentId` (Guid) | `postId` (Guid)<br>`pageNumber` (int, default: 1)<br>`pageSize` (int, default: 10) | *None* |
+| `Medium` | `DELETE` | `/api/comment/{id}` | `id` (Guid) | *None* | *None* |
+| `Low` | `PATCH` | `/api/comment/{id}` | `id` (Guid) | *None* | `{ content?, media?, mentionedUserIds? }` |
 
-#### Using PowerShell Script (Windows)
+---
 
-The project includes a convenient PowerShell script at `src/ef.ps1` for managing migrations:
+### 5. Reactions (`/api/reaction`)
 
-```powershell
-# Navigate to src directory
-cd src
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `POST` | `/api/reaction` | *None* | *None* | `{ targetId, reactType, targetType }` |
+| `Medium` | `PATCH` | `/api/reaction/{id}` | `id` (Guid) | *None* | `{ reactType }` |
+| `Medium` | `DELETE` | `/api/reaction/{id}` | `id` (Guid) | *None* | *None* |
 
-# Add a new migration
-.\ef.ps1 -add MigrationName
+---
 
-# Update database to latest migration
-.\ef.ps1 -up
+### 6. Friendships & Relationships (`/api/friendship`)
 
-# Remove the last migration
-.\ef.ps1 -remove
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/friendship/friends` | *None* | `search` (string?, optional) | *None* |
+| `High` | `POST` | `/api/friendship/{userId}/request` | `userId` (Guid) | *None* | *None* |
+| `High` | `PATCH` | `/api/friendship/{userId}/accept` | `userId` (Guid) | *None* | *None* |
+| `Medium` | `PATCH` | `/api/friendship/{userId}/unfriend` | `userId` (Guid) | *None* | *None* |
+| `Medium` | `POST` | `/api/friendship/{userId}/cancel` | `userId` (Guid) | *None* | *None* |
+| `Low` | `POST` | `/api/friendship/{userId}/block` | `userId` (Guid) | *None* | *None* |
+| `Low` | `POST` | `/api/friendship/{userId}/unblock` | `userId` (Guid) | *None* | *None* |
 
-# Display help
-.\ef.ps1
-```
+---
 
-#### Using dotnet ef Directly (Cross-Platform)
+### 7. Media & Upload (`/api/media`)
 
-```bash
-# Add a new migration
-dotnet ef migrations add MigrationName \
-  --project src/Infrastructure/Infrastructure.csproj \
-  --startup-project src/Api/Api.csproj \
-  --output-dir Persistence/Migrations
-
-# Update database to latest migration
-dotnet ef database update \
-  --project src/Infrastructure/Infrastructure.csproj \
-  --startup-project src/Api/Api.csproj
-
-# Remove the last migration
-dotnet ef migrations remove \
-  --project src/Infrastructure/Infrastructure.csproj \
-  --startup-project src/Api/Api.csproj
-
-# List all migrations
-dotnet ef migrations list \
-  --project src/Infrastructure/Infrastructure.csproj \
-  --startup-project src/Api/Api.csproj
-```
-
-### 5. Run the Application
-
-```bash
-dotnet run --project src/Api/Api.csproj
-```
-
-The API will start on `http://localhost:5000` (or as configured in `launchSettings.json`).
-
-## Access Points
-
-### API Endpoints
-- **Base URL**: `http://localhost:5000`
-- **Swagger UI**: `http://localhost:5000/swagger` or `http://localhost:5000/swagger/index.html`
-- **OpenAPI Spec**: `http://localhost:5000/openapi/v1.json`
-
-### Background Jobs
-- **Hangfire Dashboard**: `http://localhost:5000/hangfire`
-
-### Real-time Communication
-- **SignalR Hub**: `http://localhost:5000/hubs/notifications`
-
-## Configuration
-
-The application uses the `appsettings.json` and environment-specific configuration files:
-
-### Key Configuration Sections
-
-**Connection Strings** (`appsettings.Development.json`):
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Host=localhost;Port=5432;Database=SocialFlow;Username=postgres;Password=your_password",
-  "Redis": "localhost:6379,password=your_password,abortConnect=false"
-}
-```
-
-**JWT Settings**:
-```json
-"JwtSettings": {
-  "SecretKey": "your-secret-key-minimum-32-characters",
-  "Issuer": "SocialFlow_API",
-  "Audience": "SocialFlow_Frontend",
-  "ExpiryInMinutes": 15
-}
-```
-
-**Email Settings** (for notifications):
-```json
-"EmailSettings": {
-  "Host": "smtp.gmail.com",
-  "Port": 587,
-  "Username": "your-email@gmail.com",
-  "Password": "your-app-specific-password",
-  "From": "your-email@gmail.com"
-}
-```
-
-**Allowed Origins** (CORS):
-```json
-"AllowedOrigins": ["http://localhost:5173", "https://your-domain.com"]
-}
-```
-
-## Project Structure
-
-The project follows Clean Architecture principles:
-
-```
-src/
-├── Api/                    # Presentation layer (Web API)
-│   ├── Controllers/        # API controllers
-│   ├── Middlewares/        # Custom middleware
-│   └── Extensions/         # Service extensions
-├── Application/           # Application layer
-│   ├── Features/           # Feature modules (CQRS)
-│   ├── Common/             # Shared application logic
-│   └── DependencyInjection.cs
-├── Domain/                 # Domain layer
-│   ├── Entities/           # Domain entities
-│   ├── Enums/              # Enumerations
-│   ├── Events/             # Domain events
-│   └── Errors/             # Domain errors
-└── Infrastructure/         # Infrastructure layer
-    ├── Persistence/        # Database context & migrations
-    ├── Services/           # External services
-    ├── Authentication/    # Identity & JWT
-    └── BackgroundJobs/     # Hangfire jobs
-```
-
-## Development Workflow
-
-### Creating a New Feature
-
-1. **Create Domain Entity** (in `src/Domain/Entities/`)
-2. **Create Repository** (in `src/Infrastructure/Persistence/Repository/`)
-3. **Create CQRS Handlers** (in `src/Application/Features/`)
-4. **Create Controller** (in `src/Api/Controller/`)
-5. **Add Migration** (if schema changed)
-6. **Test** using Swagger UI or integration tests
-
-### Adding a New Migration
-
-When you modify entities or need to update the database schema:
-
-```bash
-# Using PowerShell
-cd src
-.\ef.ps1 -add DescriptiveMigrationName
-
-# Or using dotnet ef
-dotnet ef migrations add DescriptiveMigrationName \
-  --project src/Infrastructure/Infrastructure.csproj \
-  --startup-project src/Api/Api.csproj \
-  --output-dir Persistence/Migrations
-```
-
-Then update the database:
-```bash
-# Using PowerShell
-.\ef.ps1 -up
-
-# Or using dotnet ef
-dotnet ef database update \
-  --project src/Infrastructure/Infrastructure.csproj \
-  --startup-project src/Api/Api.csproj
-```
-
-## Testing
-
-### Run Unit Tests
-```bash
-dotnet test tests/SocialFlow.UnitTests/SocialFlow.UnitTests.csproj
-```
-
-### Run Integration Tests
-```bash
-dotnet test tests/SocialFlow.IntegrationTests/SocialFlow.IntegrationTests.csproj
-```
-
-## Troubleshooting
-
-### Database Connection Issues
-- Ensure PostgreSQL is running: `docker ps` or check locally installed service
-- Verify connection string in `appsettings.Development.json`
-- Check if the database exists: Connect to PostgreSQL and run `\l` to list databases
-
-### Migration Issues
-- If migrations fail, try removing the last migration and recreating it
-- Ensure you're in the correct directory when running EF commands
-- Check that Entity Framework Core tools are installed: `dotnet ef --version`
-
-### Redis Connection Issues
-- Ensure Redis is running: `docker ps` or `redis-cli ping`
-- Verify Redis connection string in configuration
-- Check firewall settings if Redis is on a different machine
-
-### Build Issues
-- Restore NuGet packages: `dotnet restore`
-- Clean and rebuild: `dotnet clean && dotnet build`
-- Ensure you're using .NET 10.0 SDK: `dotnet --version`
-
-## Additional Resources
-
-- [Entity Framework Core Documentation](https://docs.microsoft.com/en-us/ef/core/)
-- [ASP.NET Core Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
-- [SignalR Documentation](https://docs.microsoft.com/en-us/aspnet/core/signalr/)
-- [Hangfire Documentation](https://docs.hangfire.io/)
-
-## License
-
-[Add your license information here]
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/media/setup-upload` | *None* | `folder` (string, default: "socialflow/posts") | *None* |
+| `Medium` | `DELETE` | `/api/media` | *None* | `publicId` (string)<br>`mediaType` (enum: Image, Video, default: Image) | *None* |
+
+---
+
+### 8. Notifications & Presence (`/api/notification`) [Plan / In-Development]
+
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/notification` | *None* | `pageNumber` (int, default: 1)<br>`pageSize` (int, default: 20) | *None* |
+| `Medium` | `PATCH` | `/api/notification/{id}/read` | `id` (Guid) | *None* | *None* |
+| `Medium` | `PATCH` | `/api/notification/read-all` | *None* | *None* | *None* |
+
+---
+
+### 9. Messaging & Chat (`/api/chat`) [Plan / In-Development]
+
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/chat/conversations` | *None* | `pageNumber` (int, default: 1)<br>`pageSize` (int, default: 20) | *None* |
+| `High` | `GET` | `/api/chat/conversations/{id}/messages` | `id` (Guid) | `pageNumber` (int, default: 1)<br>`pageSize` (int, default: 50) | *None* |
+| `High` | `POST` | `/api/chat/messages` | *None* | *None* | `{ conversationId?, recipientId?, content?, media? }` |
+| `Medium` | `DELETE` | `/api/chat/messages/{id}` | `id` (Guid) | *None* | *None* |
+
+---
+
+### 10. Groups (`/api/group`) [Plan / In-Development]
+
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/group/my-groups` | *None* | `search` (string?) | *None* |
+| `High` | `POST` | `/api/group` | *None* | *None* | `{ name, description, privacyLevel }` |
+| `Medium` | `POST` | `/api/group/{id}/join` | `id` (Guid) | *None* | *None* |
+| `Medium` | `POST` | `/api/group/{id}/leave` | `id` (Guid) | *None* | *None* |
+
+---
+
+### 11. Search & Discovery (`/api/search`) [Plan / In-Development]
+
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `High` | `GET` | `/api/search/users` | *None* | `q` (string), `pageNumber` (int), `pageSize` (int) | *None* |
+| `High` | `GET` | `/api/search/posts` | *None* | `q` (string), `pageNumber` (int), `pageSize` (int) | *None* |
+| `Medium` | `GET` | `/api/search/suggestions` | *None* | *None* | *None* |
+
+---
+
+### 12. Stories (`/api/story`) [Plan / In-Development]
+
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `Medium` | `GET` | `/api/story/feed` | *None* | *None* | *None* |
+| `Medium` | `POST` | `/api/story` | *None* | *None* | `{ mediaUrl, mediaType, caption? }` |
+| `Low` | `DELETE` | `/api/story/{id}` | `id` (Guid) | *None* | *None* |
+
+---
+
+### 13. Voice & Video Calls (`/api/call`) [Plan / In-Development]
+
+| Priority | Method | Endpoint | Path Parameters | Query / Filters & Pagination | Request Body |
+|---|---|---|---|---|---|
+| `Low` | `POST` | `/api/call/initiate` | *None* | *None* | `{ receiverId, callType }` |
+| `Low` | `POST` | `/api/call/{id}/end` | `id` (Guid) | *None* | *None* |

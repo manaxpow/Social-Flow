@@ -44,7 +44,7 @@ public class EmailService(IOptions<EmailSettings> options) : IEmailService
         var body = template
             .Replace("{{ConfirmationLink}}", linkConfirmationToken)
             .Replace("{{UserName}}", name);
-        await SendEmailAsync(email, "Yêu cầu đặt lại mật khẩu", body);
+        await SendEmailAsync(email, "Confirm your email", body);
     }
 
     public async Task SendLockoutEmailAsync(string email, string name, string traceId)

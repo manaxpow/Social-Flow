@@ -30,7 +30,7 @@ export const TabNavigation = ({
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
-  useEffect(() => {
+  const updateIndicator = () => {
     const activeIndex = tabs.findIndex(tab => tab.id === value);
     const activeTab = tabsRef.current[activeIndex];
     
@@ -41,15 +41,21 @@ export const TabNavigation = ({
         opacity: 1
       });
     }
+  };
+
+  useEffect(() => {
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
   }, [value]);
 
   return (
-    <div className="border-b border-slate-200 dark:border-slate-800 bg-background/95 backdrop-blur-sm sticky top-0 z-10">
-      <Tabs value={value} onValueChange={onValueChange} className="w-full">
-        <TabsList className="w-full justify-start h-14 bg-transparent rounded-none px-6 gap-8 overflow-x-auto relative">
+    <div className="border-b border-slate-200 dark:border-slate-800 bg-background/95 backdrop-blur-md sticky top-0 z-20">
+      <Tabs value={value} onValueChange={onValueChange} className="w-full max-w-300 mx-auto">
+        <TabsList className="w-full justify-start h-14 bg-transparent rounded-none px-4 md:px-6 gap-1 md:gap-2 overflow-x-auto relative scrollbar-none border-none">
           {/* Sliding Indicator */}
           <div
-            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#00CFEE] to-[#0061FF] transition-all duration-300 ease-out"
+            className="absolute bottom-0 h-[3px] bg-linear-to-r from-[#00CFEE] to-[#0061FF] rounded-t-full transition-all duration-300 ease-out z-10"
             style={{
               left: `${indicatorStyle.left}px`,
               width: `${indicatorStyle.width}px`,
@@ -68,17 +74,25 @@ export const TabNavigation = ({
                   tabsRef.current[index] = el;
                 }}
                 value={tab.id}
-                className="relative data-[state=active]:text-[#0061FF] data-[state=active]:font-semibold rounded-none px-1 bg-transparent shadow-none hover:text-[#0061FF] transition-all duration-200 whitespace-nowrap group"
+                className="relative cursor-pointer border-none shadow-none outline-hidden focus:outline-hidden focus:ring-0 focus-visible:ring-0 focus-visible:outline-hidden data-[state=active]:bg-transparent dark:data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-none data-[state=active]:text-[#0061FF] dark:data-[state=active]:text-[#0061FF] text-slate-600 dark:text-slate-400 hover:text-[#0061FF] hover:bg-slate-100/70 dark:hover:bg-slate-800/50 rounded-lg px-3 py-2 transition-all duration-200 whitespace-nowrap group h-10 my-auto"
               >
-                <span className="flex items-center gap-2 px-3 py-1">
+                <span className="flex items-center gap-2">
                   <Icon 
                     className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${
-                      isActive ? 'text-[#0061FF]' : 'text-slate-400'
+                      isActive ? 'text-[#0061FF]' : 'text-slate-400 dark:text-slate-500 group-hover:text-[#0061FF]'
                     }`} 
                   />
-                  <span className="text-[15px]">{tab.label}</span>
+                  <span className={`text-[14px] md:text-[15px] font-medium transition-colors ${
+                    isActive ? 'font-semibold text-[#0061FF]' : ''
+                  }`}>
+                    {tab.label}
+                  </span>
                   {tab.count !== null && tab.count > 0 && (
-                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+                    <span className={`inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full transition-colors ${
+                      isActive 
+                        ? 'bg-blue-100 dark:bg-blue-950/80 text-[#0061FF]' 
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-slate-700 group-hover:text-[#0061FF]'
+                    }`}>
                       {tab.count}
                     </span>
                   )}
@@ -90,4 +104,4 @@ export const TabNavigation = ({
       </Tabs>
     </div>
   );
-};
+};

@@ -54,6 +54,8 @@ export const useUpdateProfileImageMutation = ({
       if (uploadedImageUrl) {
         dispatch(updateUserProfile({ [config.urlKey]: uploadedImageUrl }));
       }
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["my-posts"] });
       queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
       onSuccess?.();

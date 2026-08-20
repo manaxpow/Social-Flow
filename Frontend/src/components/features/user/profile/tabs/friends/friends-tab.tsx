@@ -100,10 +100,10 @@ export const FriendsTab = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1 hover:bg-[#00CFEE]/10 hover:border-[#00CFEE] hover:text-[#0061FF] transition-colors"
+                    className="flex-1 cursor-pointer hover:bg-[#00CFEE]/10 hover:border-[#00CFEE] hover:text-[#0061FF] transition-colors"
                     onClick={() => handleSendMessage(friend.id)}
                   >
-                    <MessageSquare className="h-3 w-3 mr-1" />
+                    <MessageSquare className="h-3.5 w-3.5 mr-1" />
                     Message
                   </Button>
                   
@@ -111,19 +111,19 @@ export const FriendsTab = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors"
+                      className="flex-1 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-300 hover:text-red-600 transition-colors"
                       onClick={() => handleUnfriend(friend.id)}
                     >
-                      <UserX className="h-3 w-3 mr-1" />
+                      <UserX className="h-3.5 w-3.5 mr-1" />
                       Unfriend
                     </Button>
                   ) : (
                     <Button
                       size="sm"
                       variant="outline"
-                      className="px-2 hover:bg-slate-100 transition-colors"
+                      className="px-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
-                      <MoreHorizontal className="h-3 w-3" />
+                      <MoreHorizontal className="h-3.5 w-3.5" />
                     </Button>
                   )}
                 </div>

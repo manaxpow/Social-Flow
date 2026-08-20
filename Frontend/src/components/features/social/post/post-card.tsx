@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Globe } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserAvatarLink } from "@/components/common/user-link";
 import {
   Tooltip,
@@ -10,7 +10,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PostDetailDialog } from "./post-detail-dialog";
-import { PhotoDialog } from "./photo-dialog";
 import { PostOptionsMenu } from "./components/post-options-menu";
 import { MediaGallery } from "./components/media-gallery";
 import { PostCardStats } from "./components/post-card-stats";
@@ -30,9 +29,9 @@ interface PostCardProps {
 const POST_TRUNCATE_LENGTH = 2000;
 
 export const PostCard = ({ post, onDelete }: PostCardProps) => {
+  const navigate = useNavigate();
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const [showPostDetail, setShowPostDetail] = useState(false);
-  const [showPhotoDetail, setShowPhotoDetail] = useState(false);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isPostExpanded, setIsPostExpanded] = useState(false);
 
@@ -40,8 +39,7 @@ export const PostCard = ({ post, onDelete }: PostCardProps) => {
   const isOwnPost = currentUser?.id === post.author.id;
 
   const handleImageClick = (mediaIndex: number) => {
-    setSelectedMediaIndex(mediaIndex);
-    setShowPhotoDetail(true);
+    navigate(`/photo/${post.id}?index=${mediaIndex}`);
   };
 
   const handleCommentClick = () => {
@@ -165,14 +163,7 @@ export const PostCard = ({ post, onDelete }: PostCardProps) => {
         post={post}
         initialMediaIndex={selectedMediaIndex}
       />
-
-      {/* Photo Dialog */}
-      <PhotoDialog
-        open={showPhotoDetail}
-        onOpenChange={setShowPhotoDetail}
-        post={post}
-        initialMediaIndex={selectedMediaIndex}
-      />
     </>
   );
 };
+
