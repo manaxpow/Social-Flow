@@ -5,7 +5,7 @@ import { UserAvatarLink } from "@/components/common/user-link";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { CommentStatus } from "../../hooks/use-comments";
+import type { CommentStatus } from "@/hooks/useComments";
 
 export interface CommentBaseProps {
   // Author info

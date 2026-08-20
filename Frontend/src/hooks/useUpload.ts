@@ -4,42 +4,37 @@ import { mediaService } from "@/services/media/media.service";
 export interface UploadResult {
   secure_url: string;
   public_id: string;
-  format: string;
-  width: number;
-  height: number;
-  bytes: number;
+  format?: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
 }
 
 interface UseUploadReturn {
-  uploadToCloud: (file: File) => Promise<UploadResult>;
-  uploadMultiple: (files: File[]) => Promise<UploadResult[]>;
+  uploadToCloud: (file: File, folder?: string) => Promise<UploadResult>;
+  uploadMultiple: (files: File[], folder?: string) => Promise<UploadResult[]>;
   isUploading: boolean;
   progress: number;
   error: string | null;
   deleteFromCloud: (publicId: string) => Promise<void>;
 }
 
+/**
+ * Hook for uploading images to Cloudinary via backend-signed upload tokens.
+ * Used by CreatePostCard and PostCard.
+ */
 export const useUpload = (): UseUploadReturn => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const uploadToCloud = useCallback(
-    async (file: File): Promise<UploadResult> => {
+    async (file: File, folder: string = "socialflow/posts"): Promise<UploadResult> => {
       setIsUploading(true);
       setProgress(0);
       setError(null);
 
       try {
-        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-        if (!cloudName || !uploadPreset) {
-          throw new Error(
-            "Cloudinary configuration missing. Please check environment variables."
-          );
-        }
-
         // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
           throw new Error("File size must be less than 10MB");
@@ -50,12 +45,7 @@ export const useUpload = (): UseUploadReturn => {
           throw new Error("Only image files are allowed");
         }
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", uploadPreset);
-        formData.append("folder", "socialflow/posts");
-
-        // Simulate progress (since Cloudinary doesn't provide progress for unsigned uploads)
+        // Progress simulation for UI feedback
         const progressInterval = setInterval(() => {
           setProgress((prev) => {
             if (prev >= 90) {
@@ -66,33 +56,18 @@ export const useUpload = (): UseUploadReturn => {
           });
         }, 200);
 
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+        // Fetch signature from backend and upload to Cloudinary using Signed Upload
+        const data = await mediaService.getSignatureAndUpload(file, folder);
 
         clearInterval(progressInterval);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error?.message || "Failed to upload image to Cloudinary"
-          );
-        }
-
-        const data = await response.json();
         setProgress(100);
 
         return {
           secure_url: data.secure_url,
           public_id: data.public_id,
-          format: data.format,
-          width: data.width,
-          height: data.height,
-          bytes: data.bytes,
+          format: data.format ?? "",
+          width: data.width ?? 0,
+          height: data.height ?? 0,
         };
       } catch (err) {
         const errorMessage =
@@ -107,7 +82,7 @@ export const useUpload = (): UseUploadReturn => {
   );
 
   const uploadMultiple = useCallback(
-    async (files: File[]): Promise<UploadResult[]> => {
+    async (files: File[], folder: string = "socialflow/posts"): Promise<UploadResult[]> => {
       if (files.length === 0) return [];
 
       setIsUploading(true);
@@ -118,7 +93,7 @@ export const useUpload = (): UseUploadReturn => {
         const results: UploadResult[] = [];
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          const result = await uploadToCloud(file);
+          const result = await uploadToCloud(file, folder);
           results.push(result);
           setProgress(Math.round(((i + 1) / files.length) * 100));
         }

@@ -26,7 +26,7 @@ export function UserLink({
       to={`/profile/${userId}`}
       className={`flex items-center gap-3 group ${className}`}
     >
-      <Avatar className={`${avatarClassName} ring-1 ring-slate-100`}>
+      <Avatar className={`${avatarClassName} ring-2 ring-primary/25 hover:ring-primary border border-background shadow-2xs transition-all duration-200`}>
         <AvatarImage
           src={avatarUrl ?? undefined}
           alt={name ?? ""}
@@ -67,7 +67,7 @@ export function UserAvatarLink({
 
   return (
     <Link to={`/profile/${userId}`} className="shrink-0">
-      <Avatar className={className}>
+      <Avatar className={`ring-2 ring-[#1877f2] dark:ring-blue-500 border-2 border-background shadow-xs transition-all duration-200 ${className}`}>
         <AvatarImage
           src={avatarUrl ?? undefined}
           alt={name ?? ""}

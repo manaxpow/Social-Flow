@@ -27,7 +27,7 @@ interface LoginDropdownProps {
 
 export const LoginDropdown = ({ user }: LoginDropdownProps) => {
   const dispatch = useAppDispatch();
-  
+
   const handleLogout = () => {
     dispatch(logoutAction());
   };
@@ -64,7 +64,7 @@ export const LoginDropdown = ({ user }: LoginDropdownProps) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-            <Avatar className="h-12 w-12">
+            <Avatar className="h-8 w-8">
               <AvatarImage src={user?.avatarUrl || undefined} alt={userFullName} />
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
@@ -97,7 +97,7 @@ export const LoginDropdown = ({ user }: LoginDropdownProps) => {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem 
+          <DropdownMenuItem
             className="text-destructive cursor-pointer"
             onClick={handleLogout}
           >

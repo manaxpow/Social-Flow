@@ -1,30 +1,24 @@
-import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
 import { useAppSelector } from "@/stores/hook";
 import { ProfileHeader } from "@/components/features/user/profile/header/profile-header";
 import { AboutTab } from "@/components/features/user/profile/tabs/about/about-tab";
 import { FriendsPreview } from "@/components/features/user/profile/tabs/friends/friends-preview";
-import { ImagesPreview } from "@/components/features/user/profile/tabs/media/images-preview";
 import { CreatePostCard } from "@/components/features/user/profile/create-post/create-post-card";
 import { PostList } from "@/components/features/user/profile/tabs/posts/post-list";
-import { flattenMediaFromPosts } from "@/services/post/dtos/helpers/post-helpers";
 import { useUserProfile } from "@/hooks/queries/useProfileQueries";
 import { useUserPosts } from "@/hooks/queries/useProfileQueries";
 import { useDeletePost } from "@/hooks/queries/useProfileQueries";
+import { useParams } from "react-router-dom";
 
 export const ClientProfilePage = () => {
   const { userId = "me" } = useParams();
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const queryClient = useQueryClient();
-  const [selectedUserId, setSelectedUserId] = useState(userId);
 
   // Fetch profile data
-  const { data: profile, isLoading: isProfileLoading } = useUserProfile(selectedUserId);
-  
-  // Fetch user posts with race condition protection
+  const { data: profile, isLoading: isProfileLoading } = useUserProfile(userId);
+
+  // Fetch user posts
   const { data: postsData, isLoading: isPostsLoading } = useUserPosts(
-    selectedUserId,
+    userId,
     1,
     10
   );
@@ -36,13 +30,10 @@ export const ClientProfilePage = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       await deletePost.mutateAsync({
         postId,
-        userId: selectedUserId,
+        userId,
       });
     }
   };
-
-  // Prepare media gallery items from posts
-  const mediaItems = flattenMediaFromPosts(postsData?.items || []);
 
   // Format joined date
   const formatJoinedDate = (date?: string): string => {
@@ -53,32 +44,14 @@ export const ClientProfilePage = () => {
     });
   };
 
-  // Race condition protection: Cancel queries when userId changes
-  useEffect(() => {
-    if (userId !== selectedUserId) {
-      setSelectedUserId(userId);
-    }
-
-    return () => {
-      // Cancel all queries for previous userId
-      queryClient.cancelQueries({
-        queryKey: ["profile", selectedUserId],
-      });
-      queryClient.cancelQueries({
-        queryKey: ["posts", selectedUserId],
-      });
-    };
-  }, [userId, selectedUserId, queryClient]);
-
   // Use current user data if viewing own profile
   const displayUser = userId === "me" ? currentUser : profile;
   const isOwnProfile = userId === "me";
 
-  const photosCount = mediaItems.filter(item => item.mediaType !== 'video').length;
   const friendsCount = displayUser?.followersCount || 0;
 
   return (
-    <div className="max-w-[1600px] mx-auto">
+    <div className="max-w-300 mx-auto">
       {/* Profile Header */}
       <ProfileHeader
         user={displayUser}
@@ -88,9 +61,31 @@ export const ClientProfilePage = () => {
 
       {/* Profile Content */}
       <div className="mt-6 px-4 lg:px-0">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Left Sidebar - Sticky (40% width) */}
-          <div className="hidden lg:block lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Mobile Info View (visible on < lg) */}
+          <div className="block lg:hidden space-y-6">
+            <AboutTab
+              name={displayUser?.fullName}
+              bio={displayUser?.bio}
+              email={displayUser?.email}
+              birthday={displayUser?.dateOfBirth?.toString()}
+              gender={displayUser?.gender}
+              joinedDate={displayUser?.createdAt
+                ? formatJoinedDate(displayUser.createdAt)
+                : undefined
+              }
+              isLoading={isProfileLoading}
+            />
+
+            <FriendsPreview
+              totalFriends={friendsCount}
+              onViewAll={() => { }}
+              isLoading={isProfileLoading}
+            />
+          </div>
+
+          {/* Desktop Left Sidebar (1/3 width - visible on >= lg) */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-6 space-y-6">
               <AboutTab
                 name={displayUser?.fullName}
@@ -98,32 +93,25 @@ export const ClientProfilePage = () => {
                 email={displayUser?.email}
                 birthday={displayUser?.dateOfBirth?.toString()}
                 gender={displayUser?.gender}
-                joinedDate={displayUser?.createdAt 
+                joinedDate={displayUser?.createdAt
                   ? formatJoinedDate(displayUser.createdAt)
                   : undefined
                 }
                 isLoading={isProfileLoading}
               />
 
-              <ImagesPreview
-                images={mediaItems.filter(item => item.mediaType !== 'video').map((item, i) => ({ id: `${i}`, url: item.mediaUrl }))}
-                totalImages={photosCount}
-                onViewAll={() => {}}
-                isLoading={isPostsLoading}
-              />
-              
               <FriendsPreview
                 totalFriends={friendsCount}
-                onViewAll={() => {}}
+                onViewAll={() => { }}
                 isLoading={isProfileLoading}
               />
             </div>
           </div>
 
-          {/* Right Column - Timeline (60% width) */}
-          <div className="lg:col-span-3 space-y-6">
+          {/* Right Column - Timeline (2/3 width) */}
+          <div className="lg:col-span-2 space-y-6">
             {isOwnProfile && <CreatePostCard />}
-            
+
             <PostList
               posts={postsData?.items}
               isLoading={isPostsLoading}

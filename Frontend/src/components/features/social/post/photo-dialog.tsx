@@ -24,22 +24,12 @@ import { toast } from "sonner";
 import type { PostDetailResponse } from "@/services/post/dtos/response/post-detail.response";
 import { getPostAvatar, getPostAuthorName } from "@/services/post/dtos/helpers/post-helpers";
 import { commentService } from "@/services/comment/comment.service";
-import type { CommentWithReplies, ReplyItem } from "./hooks/use-comments";
+import { useComments, type CommentWithReplies, type ReplyItem } from "@/hooks/useComments";
 import { useAppSelector } from "@/stores/hook";
 import { CommentItem } from "./components/comment-item";
 import { CommentInputField } from "./components/comment-input-field";
-import { useComments } from "./hooks/use-comments";
 import api from "@/lib/axios/axios";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/vi";
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(relativeTime);
-dayjs.locale("vi");
+import { formatPostDate, formatRelativeTime as formatDate } from "@/utils/date";
 
 interface PhotoDialogProps {
   open: boolean;
@@ -144,14 +134,6 @@ export const PhotoDialog = ({
     setCurrentMediaIndex((prev) => 
       prev === mediaItems.length - 1 ? 0 : prev + 1
     );
-  };
-
-  const formatPostDate = (date: string) => {
-    return dayjs.utc(date).tz("Asia/Ho_Chi_Minh").fromNow();
-  };
-
-  const formatDate = (date: string) => {
-    return dayjs.utc(date).tz("Asia/Ho_Chi_Minh").fromNow();
   };
 
   const authorName = getPostAuthorName(post);

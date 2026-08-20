@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CommentWithReplies } from "../../hooks/use-comments";
+import type { CommentWithReplies } from "@/hooks/useComments";
 import { CommentInputField } from "../comment-input-field";
 import { CommentReplyItem } from "./CommentReplyItem";
 import { CommentBase } from "./CommentBase";

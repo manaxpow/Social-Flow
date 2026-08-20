@@ -91,7 +91,7 @@ export const AboutTab = ({
             <Label className="text-base font-semibold">Contact Info</Label>
             {email && (
               <div className="flex items-start gap-3 text-sm">
-                <Mail className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <Mail className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <a href={`mailto:${email}`} className="text-[#0061FF] hover:underline transition-colors">
                   {email}
                 </a>
@@ -99,7 +99,7 @@ export const AboutTab = ({
             )}
             {phone && (
               <div className="flex items-start gap-3 text-sm">
-                <Phone className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <Phone className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <a href={`tel:${phone}`} className="text-[#0061FF] hover:underline transition-colors">
                   {phone}
                 </a>
@@ -114,13 +114,13 @@ export const AboutTab = ({
             <Label className="text-base font-semibold">Basic Info</Label>
             {birthday && (
               <div className="flex items-start gap-3 text-sm">
-                <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <span>Birthday: {formatDate(birthday)}</span>
               </div>
             )}
             {gender && (
               <div className="flex items-start gap-3 text-sm">
-                <span className="w-4 h-4 mt-0.5 flex items-center justify-center text-muted-foreground flex-shrink-0">
+                <span className="w-4 h-4 mt-0.5 flex items-center justify-center text-muted-foreground shrink-0">
                   ⚧
                 </span>
                 <span>Gender: {gender}</span>
@@ -128,7 +128,7 @@ export const AboutTab = ({
             )}
             {relationshipStatus && (
               <div className="flex items-start gap-3 text-sm">
-                <Heart className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <Heart className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <span>Relationship: {relationshipStatus}</span>
               </div>
             )}
@@ -141,13 +141,13 @@ export const AboutTab = ({
             <Label className="text-base font-semibold">Work & Education</Label>
             {work && (
               <div className="flex items-start gap-3 text-sm">
-                <Briefcase className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <Briefcase className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <span>{work}</span>
               </div>
             )}
             {education && (
               <div className="flex items-start gap-3 text-sm">
-                <GraduationCap className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <GraduationCap className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 <span>{education}</span>
               </div>
             )}
@@ -159,7 +159,7 @@ export const AboutTab = ({
           <div className="space-y-3">
             <Label className="text-base font-semibold">Location</Label>
             <div className="flex items-start gap-3 text-sm">
-              <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+              <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <span>{location}</span>
             </div>
           </div>
@@ -170,7 +170,7 @@ export const AboutTab = ({
           <div className="space-y-3">
             <Label className="text-base font-semibold">Website</Label>
             <div className="flex items-start gap-3 text-sm">
-              <span className="w-4 h-4 mt-0.5 flex items-center justify-center text-muted-foreground flex-shrink-0">
+              <span className="w-4 h-4 mt-0.5 flex items-center justify-center text-muted-foreground shrink-0">
                 🔗
               </span>
               <a
@@ -190,7 +190,7 @@ export const AboutTab = ({
           <div className="space-y-3">
             <Label className="text-base font-semibold">Joined SocialFlow</Label>
             <div className="flex items-start gap-3 text-sm">
-              <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+              <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
               <span>{new Date(joinedDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
             </div>
           </div>

@@ -1,7 +1,7 @@
 // Hooks
-export { useComments } from "./hooks/use-comments";
-export { useCommentActions } from "./hooks/use-comment-actions";
-export type { CommentWithReplies, ReplyItem } from "./hooks/use-comments";
+export { useComments } from "@/hooks/useComments";
+export { useCommentActions } from "@/hooks/useCommentActions";
+export type { CommentWithReplies, ReplyItem } from "@/hooks/useComments";
 
 // Components
 export { CommentInput } from "./components/comment-input";

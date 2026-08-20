@@ -281,21 +281,23 @@ export const CreatePostCard = () => {
   };
 
   return (
-    <Card className="border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-200 md:rounded-xl">
-      <CardContent className="p-4">
-        <div className="flex gap-3">
-          <Avatar className="h-10 w-10">
+    <Card className="border-0 sm:border border-slate-200 dark:border-slate-800 shadow-none sm:shadow-sm bg-transparent sm:bg-card hover:shadow-none sm:hover:shadow-md transition-shadow duration-200 rounded-none md:rounded-xl !p-0">
+      <CardContent className="!p-0 sm:!p-4">
+        <div className="flex gap-3 items-center min-w-0">
+          <Avatar className="h-10 w-10 shrink-0 ring-2 ring-primary/25 border border-background shadow-2xs">
             <AvatarImage src={user?.avatarUrl} />
-            <AvatarFallback>{user?.fullName}</AvatarFallback>
+            <AvatarFallback>{user?.fullName?.[0]?.toUpperCase() ?? "U"}</AvatarFallback>
           </Avatar>
 
           <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); else setOpen(true); }}>
             <DialogTrigger asChild>
               <Button
                 variant="secondary"
-                className="flex-1 justify-start rounded-full text-muted-foreground text-[17px] font-normal h-10 px-4"
+                className="flex-1 justify-start rounded-full text-muted-foreground text-sm sm:text-[16px] font-normal h-10 px-4 min-w-0 overflow-hidden"
               >
-                {user?.fullName} ơi, bạn đang nghĩ gì thế?
+                <span className="truncate">
+                  {user?.fullName ? `${user.fullName} ơi, bạn đang nghĩ gì thế?` : "Bạn đang nghĩ gì thế?"}
+                </span>
               </Button>
             </DialogTrigger>
 
@@ -308,7 +310,7 @@ export const CreatePostCard = () => {
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4 overflow-y-auto flex-1">
                   <div className="flex gap-3 items-center">
-                    <Avatar className="h-11 w-11">
+                    <Avatar className="h-11 w-11 ring-2 ring-primary/25 border border-background shadow-2xs">
                       <AvatarImage src={user?.avatarUrl} />
                     </Avatar>
                     <div>
