@@ -1,6 +1,5 @@
 import { Outlet, useLocation, Navigate } from "react-router-dom";
 import { Header } from "./header/header";
-import { Footer } from "./footer";
 import { useAppSelector } from "@/stores/hook";
 
 export default function ClientLayout() {
@@ -23,10 +22,9 @@ export default function ClientLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 container mx-auto py-6">
+      <main className="flex-1 max-w-300 w-full mx-auto py-6">
         <Outlet />
       </main>
-      <Footer />
     </div>
   );
 }

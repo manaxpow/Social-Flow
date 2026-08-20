@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useAppSelector } from "@/stores/hook";
 import { ProfileHeader } from "@/components/features/user/profile/header/profile-header";
 import { TabNavigation } from "@/components/features/user/profile/navigation/tab-navigation";
@@ -9,6 +9,7 @@ import { ImagesPreview } from "@/components/features/user/profile/tabs/media/ima
 import { MediaGallery } from "@/components/features/user/profile/tabs/media/media-gallery";
 import { CreatePostCard } from "@/components/features/user/profile/create-post/create-post-card";
 import { PostList } from "@/components/features/user/profile/tabs/posts/post-list";
+import { EditProfileDialog } from "@/components/features/user/profile/edit-profile-dialog";
 import { useUserProfile, useUserPosts, useDeletePost } from "@/hooks/queries/useProfileQueries";
 import { useParams, useSearchParams } from "react-router-dom";
 
@@ -16,6 +17,8 @@ export const ClientProfilePage = () => {
   const { userId = "me" } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user: currentUser } = useAppSelector((state) => state.auth);
+
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   const activeTab = searchParams.get("tab") || "posts";
 
@@ -116,7 +119,17 @@ export const ClientProfilePage = () => {
         user={displayUser}
         isLoading={isProfileLoading}
         posts={postsData?.items}
+        onEditProfile={isOwnProfile ? () => setIsEditProfileOpen(true) : undefined}
       />
+
+      {/* Edit Profile Modal */}
+      {isOwnProfile && (
+        <EditProfileDialog
+          open={isEditProfileOpen}
+          onOpenChange={setIsEditProfileOpen}
+          user={displayUser}
+        />
+      )}
 
       {/* Tab Navigation */}
       <TabNavigation

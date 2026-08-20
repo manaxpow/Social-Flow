@@ -18,7 +18,7 @@ import { UserAvatarLink } from "@/components/common/user-link";
 import { toast } from "sonner";
 import { postService } from "@/services/post/post.service";
 import { commentService } from "@/services/comment/comment.service";
-import { getPostAvatar, getPostAuthorName } from "@/services/post/dtos/helpers/post-helpers";
+import { getPostAvatar, getPostAuthorName, getPostActionText } from "@/services/post/dtos/helpers/post-helpers";
 import { useComments, type CommentWithReplies } from "@/hooks/useComments";
 import { useAppSelector } from "@/stores/hook";
 import { CommentItem } from "@/components/features/social/post/components/comment-item";
@@ -137,7 +137,9 @@ export const PhotoDetailPage = () => {
   };
 
   const authorName = getPostAuthorName(post);
+  const actionText = getPostActionText(post.type);
   const authorAvatar = getPostAvatar(post);
+  const isAvatarUpdate = post.type && String(post.type).toLowerCase().includes("avatar");
 
   // Add new comment
   const handleSendComment = async () => {
@@ -286,6 +288,14 @@ export const PhotoDetailPage = () => {
               autoPlay
               className="max-w-full max-h-full object-contain"
             />
+          ) : isAvatarUpdate ? (
+            <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full overflow-hidden border-4 border-background ring-4 ring-[#1877f2]/50 shadow-2xl transition-transform duration-300 hover:scale-105">
+              <img
+                src={currentMedia.url}
+                alt={authorName}
+                className="w-full h-full object-cover"
+              />
+            </div>
           ) : (
             <img
               src={currentMedia.url}
@@ -334,14 +344,21 @@ export const PhotoDetailPage = () => {
                 name={authorName}
                 className="h-10 w-10"
               />
-              <div>
-                <Link
-                  to={`/profile/${post.author.id}`}
-                  className="font-bold hover:underline text-[15px] block text-foreground"
-                >
-                  {authorName}
-                </Link>
-                <div className="flex items-center gap-1 text-muted-foreground text-[12px]">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5 flex-wrap leading-tight">
+                  <Link
+                    to={`/profile/${post.author.id}`}
+                    className="font-bold hover:underline text-[15px] text-foreground"
+                  >
+                    {authorName}
+                  </Link>
+                  {actionText && (
+                    <span className="text-muted-foreground text-[14px] font-normal">
+                      {actionText}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground text-[12px] mt-0.5">
                   <span>{formatPostDate(post.createdAt)}</span>
                   <span>•</span>
                   <Globe className="h-3 w-3" />

@@ -5,6 +5,14 @@ import { handleApiError } from "@/components/common/helpers/api.helper";
 
 const USER_PATH = "/user";
 
+export interface UpdateProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string | null;
+  bio?: string | null;
+  gender?: number | null;
+}
+
 export const userService = {
   getMe: async (): Promise<ApiResponse<UserResponse>> => {
     try {
@@ -24,6 +32,21 @@ export const userService = {
   getById: async (userId: string): Promise<ApiResponse<UserResponse>> => {
     try {
       const response = await api.get<UserResponse>(`${USER_PATH}/${userId}`);
+
+      return {
+        isSuccess: true,
+        data: response.data,
+        error: null,
+        status: response.status,
+      };
+    } catch (error: unknown) {
+      return handleApiError(error);
+    }
+  },
+
+  updateProfile: async (data: UpdateProfileRequest): Promise<ApiResponse<UserResponse>> => {
+    try {
+      const response = await api.patch<UserResponse>(`${USER_PATH}/profile`, data);
 
       return {
         isSuccess: true,
@@ -88,3 +111,4 @@ export const userService = {
     }
   },
 };
+

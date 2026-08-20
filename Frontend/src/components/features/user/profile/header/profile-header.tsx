@@ -18,11 +18,12 @@ interface ProfileHeaderProps {
   website?: string;
   isLoading?: boolean;
   posts?: PostDetailResponse[];
+  onEditProfile?: () => void;
 }
 
 export const ProfileHeaderSkeleton = () => {
   return (
-    <div className="max-w-400 mx-auto bg-background">
+    <div className="max-w-300 mx-auto bg-background">
       {/* Cover Skeleton */}
       <div className="h-64 md:h-80 lg:h-96 bg-slate-200">
         <Skeleton className="w-full h-full" />
@@ -63,15 +64,12 @@ export const ProfileHeader = ({
   website,
   isLoading = false,
   posts = [],
+  onEditProfile,
 }: ProfileHeaderProps) => {
   const navigate = useNavigate();
 
   // Ref to trigger cover upload from camera button
   const coverUploadTriggerRef = useRef<(() => void) | null>(null);
-
-  // Find the most recent avatarUpdate and coverUpdate posts
-  const avatarUpdatePost = posts.find((p) => p.type === "avatarUpdate");
-  const coverUpdatePost = posts.find((p) => p.type === "coverUpdate");
 
   // Map UserResponse to component variables
   const name = user?.fullName || "User Name";
@@ -82,6 +80,64 @@ export const ProfileHeader = ({
   const followingCount = user?.followingCount || 0;
   const followerCount = user?.followersCount || 0;
   const defaultGradient = getGradientForUser(user?.id);
+
+  // Find the most recent avatarUpdate and coverUpdate posts
+  const avatarUpdatePost = posts.find((p) => p.type === "avatarUpdate");
+  const coverUpdatePost = posts.find((p) => p.type === "coverUpdate");
+
+  const handleCoverPreview = () => {
+    if (!coverUrl) return;
+
+    // 1. Try finding a post whose media item matches current coverUrl
+    const matchingPost = posts.find((p) =>
+      p.mediaItems?.some(
+        (m) => m.url === coverUrl || (m.url && coverUrl && (coverUrl.includes(m.url) || m.url.includes(coverUrl)))
+      )
+    );
+
+    if (matchingPost) {
+      navigate(`/photo/${matchingPost.id}`);
+      return;
+    }
+
+    // 2. If coverUpdatePost exists
+    if (coverUpdatePost) {
+      navigate(`/photo/${coverUpdatePost.id}`);
+      return;
+    }
+
+    // 3. Fallback to first post
+    if (posts[0]) {
+      navigate(`/photo/${posts[0].id}`);
+    }
+  };
+
+  const handleAvatarPreview = () => {
+    if (!avatarUrl) return;
+
+    // 1. Try finding a post whose media item matches current avatarUrl
+    const matchingPost = posts.find((p) =>
+      p.mediaItems?.some(
+        (m) => m.url === avatarUrl || (m.url && avatarUrl && (avatarUrl.includes(m.url) || m.url.includes(avatarUrl)))
+      )
+    );
+
+    if (matchingPost) {
+      navigate(`/photo/${matchingPost.id}`);
+      return;
+    }
+
+    // 2. If avatarUpdatePost exists
+    if (avatarUpdatePost) {
+      navigate(`/photo/${avatarUpdatePost.id}`);
+      return;
+    }
+
+    // 3. Fallback to first post
+    if (posts[0]) {
+      navigate(`/photo/${posts[0].id}`);
+    }
+  };
 
   if (isLoading) {
     return <ProfileHeaderSkeleton />;
@@ -96,11 +152,11 @@ export const ProfileHeader = ({
   };
 
   return (
-    <div className="max-w-400 mx-auto bg-background pb-0">
+    <div className="max-w-300 mx-auto bg-background pb-0">
       {/* 1. Header & Cover Image with Gradient */}
       <div className="relative">
         <CoverUploader
-          onPreview={() => coverUpdatePost && navigate(`/post/${coverUpdatePost.id}`)}
+          onPreview={handleCoverPreview}
           triggerUploadRef={coverUploadTriggerRef}
         >
           <div className="relative group">
@@ -144,7 +200,7 @@ export const ProfileHeader = ({
             currentAvatar={avatarUrl ?? undefined}
             initials={name?.[0]?.toUpperCase() ?? "U"}
             size="medium"
-            onPreview={() => avatarUpdatePost && navigate(`/post/${avatarUpdatePost.id}`)}
+            onPreview={handleAvatarPreview}
           />
         </div>
       </div>
@@ -157,10 +213,15 @@ export const ProfileHeader = ({
         <Button variant="outline" size="icon" className="rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-10 h-10 cursor-pointer">
           <MoreHorizontal className="h-5 w-5" />
         </Button>
-        <Button className="rounded-full px-6 py-2 font-semibold bg-[#0061FF] hover:bg-[#0050DD] text-white transition-colors h-10 cursor-pointer">
-          <Edit className="h-4 w-4 mr-2" />
-          Edit Profile
-        </Button>
+        {onEditProfile && (
+          <Button
+            className="rounded-full px-6 py-2 font-semibold bg-[#0061FF] hover:bg-[#0050DD] text-white transition-colors h-10 cursor-pointer"
+            onClick={onEditProfile}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
       </div>
 
       {/* 3. User Info */}

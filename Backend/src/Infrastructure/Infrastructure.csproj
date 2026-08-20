@@ -25,9 +25,9 @@
     <PackageReference Include="MimeKit" Version="4.15.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
-    <EmbeddedResource Include="Templates\LockoutEmail.html" />
-    <EmbeddedResource Include="Templates\ForgotPassword.html" />
-    <EmbeddedResource Include="Templates\ConfirmEmail.html" />
+    <EmbeddedResource Include="Email\Templates\LockoutEmail.html" />
+    <EmbeddedResource Include="Email\Templates\ForgotPassword.html" />
+    <EmbeddedResource Include="Email\Templates\ConfirmEmail.html" />
   </ItemGroup>
 
   <PropertyGroup>
