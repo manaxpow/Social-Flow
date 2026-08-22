@@ -141,6 +141,25 @@ export const ClientProfilePage = () => {
         videosCount={videosCount}
       />
 
+      {/* Edit Profile Modal */}
+      {isOwnProfile && (
+        <EditProfileDialog
+          open={isEditProfileOpen}
+          onOpenChange={setIsEditProfileOpen}
+          user={displayUser}
+        />
+      )}
+
+      {/* Tab Navigation */}
+      <TabNavigation
+        value={activeTab}
+        onValueChange={handleTabChange}
+        postsCount={postsCount}
+        friendsCount={friendsCount}
+        photosCount={photosCount}
+        videosCount={videosCount}
+      />
+
       {/* Profile Content */}
       <div className="mt-6 px-4 lg:px-0">
         {activeTab === "posts" && (

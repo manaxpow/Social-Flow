@@ -1,0 +1,8 @@
+{
+  "appHost": {
+    "path": "SocialFlow.AppHost.csproj"
+  },
+  "features": {
+    "defaultWatchEnabled": "true"
+  }
+}

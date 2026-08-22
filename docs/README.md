@@ -1,4 +1,4 @@
-﻿# SocialFlow — Architecture Overview
+# SocialFlow — Architecture Overview
 
 ## 1. Feature Map
 
@@ -241,42 +241,66 @@ sequenceDiagram
 
 ## 3.2 Command Flow — Asynchronous Outbox Processing
 
-After the command transaction has committed, background processing handles the stored event independently from the original HTTP request.
+After the command transaction has committed, background processing (`ProcessOutboxMessagesJob`) handles stored events independently from the original HTTP request via Hangfire recurring execution.
 
 ```mermaid
 sequenceDiagram
     autonumber
 
-    participant HF as Hangfire
-    participant OP as Outbox Processor
-    participant EF as EF Core / DbContext
+    participant HF as Hangfire (RecurringJob)
+    participant OP as ProcessOutboxMessagesJob
+    participant UOW as UnitOfWork / OutboxRepo
     participant DB as PostgreSQL
-    participant M as MediatR
+    participant M as MediatR (IPublisher)
     participant EH as Domain Event Handler
-    participant SR as SignalR
-    participant EMAIL as Email Service
+    participant JS as JobService (Hangfire Enqueue)
 
-    HF->>OP: Execute job
+    HF->>OP: Trigger Process() [Cron: */1 * * * * *]
+    OP->>UOW: GetUnpublishedMessagesAsync(limit: 20)
+    UOW->>DB: SELECT TOP 20 WHERE ProcessedAt IS NULL
+    DB-->>UOW: List<OutboxMessage>
+    UOW-->>OP: messages
 
-    OP->>EF: Query pending OutboxMessages
-    EF->>DB: Read / claim pending messages
-    DB-->>EF: Pending rows
-    EF-->>OP: Pending event
+    alt No pending messages
+        OP-->>HF: Return early
+    else Process Pending Messages
+        loop For each message in messages
+            OP->>OP: Deserialize JSON -> IDomainEvent
 
-    OP->>M: Publish(Event)
-    M->>EH: Handle(Event)
+            alt Deserialization returns null (Invalid Payload)
+                OP->>OP: Log Warning & Update Error
+                Note over OP: ⚠️ Current Code Issue: misses SaveChangesAsync()<br/>causing infinite loop retry every second
+            else Valid Domain Event
+                rect rgb(235, 248, 255)
+                    Note over OP, EH: Execution / Happy Path
+                    OP->>M: Publish(domainEvent)
+                    M->>EH: Handle(event)
 
-    par Realtime side effect
-        EH->>SR: Push notification
-    and Email side effect
-        EH->>EMAIL: Send email
+                    opt Enqueue Async Tasks
+                        EH->>JS: Enqueue background job (e.g., Email, Notification)
+                        Note over JS: Managed by Hangfire AutoRetry (10 attempts)
+                    end
+
+                    EH-->>M: Completed
+                    M-->>OP: Completed
+                    OP->>UOW: MarkAsProcessed(UtcNow)
+                    OP->>UOW: SaveChangesAsync()
+                    UOW->>DB: UPDATE OutboxMessage (ProcessedAt = UtcNow)
+                end
+            end
+
+            rect rgb(255, 235, 235)
+                Note over OP, DB: Exception / Error Handling Path
+                opt Exception thrown during Publish / Handling
+                    OP->>OP: Log Error & IncrementAttemptCount()
+                    OP->>UOW: MarkAsFailed(UtcNow) & UpdateError(ex.Message)
+                    Note over OP, DB: 🔴 Current Code Issue: MarkAsFailed sets ProcessedAt != null,<br/>preventing future retries in GetUnpublishedMessagesAsync
+                    OP->>UOW: SaveChangesAsync()
+                    UOW->>DB: UPDATE OutboxMessage (AttemptCount++, ProcessedAt, Error)
+                end
+            end
+        end
     end
-
-    EH-->>M: Completed
-
-    OP->>EF: Mark OutboxMessage Processed
-    EF->>DB: UPDATE OutboxMessages
-    DB-->>EF: Success
 ```
 
 ### Outbox lifecycle

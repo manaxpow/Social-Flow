@@ -1,6 +1,6 @@
 using Microsoft.OpenApi;
 
-public static class SwaggerExtension
+public static class SwaggerConfiguration
 {
     public static IServiceCollection AddSwaggerDocumentaion(this IServiceCollection services)
     {

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
+import {
+  Heart,
+  MessageCircle,
+  Share2,
   MoreHorizontal,
   Globe,
   ChevronLeft,
@@ -178,20 +178,20 @@ export const PhotoDetailPage = () => {
           prev.map((c) =>
             c.id === skeletonId
               ? {
-                  id: res.data.id,
-                  content: res.data.content,
-                  reactionCount: res.data.reactionsCount || 0,
-                  authorId: res.data.author?.id || currentUser?.id || "",
-                  authorName: res.data.author?.fullName || currentUser?.fullName || "Unknown",
-                  authorAvatarUrl: res.data.author?.avatarUrl || currentUser?.avatarUrl || null,
-                  createdAt: res.data.createdAt,
-                  replyCount: 0,
-                  replies: [],
-                  repliesPage: 0,
-                  hasMoreReplies: false,
-                  showReplies: false,
-                  isPending: false,
-                }
+                id: res.data.id,
+                content: res.data.content,
+                reactionCount: res.data.reactionsCount || 0,
+                authorId: res.data.author?.id || currentUser?.id || "",
+                authorName: res.data.author?.fullName || currentUser?.fullName || "Unknown",
+                authorAvatarUrl: res.data.author?.avatarUrl || currentUser?.avatarUrl || null,
+                createdAt: res.data.createdAt,
+                replyCount: 0,
+                replies: [],
+                repliesPage: 0,
+                hasMoreReplies: false,
+                showReplies: false,
+                isPending: false,
+              }
               : c
           )
         );
@@ -397,11 +397,10 @@ export const PhotoDetailPage = () => {
             <div className="flex items-center gap-2 py-2 border-y border-slate-200 dark:border-slate-800">
               <Button
                 variant="ghost"
-                className={`flex-1 rounded-lg py-2 flex items-center justify-center gap-2 text-sm cursor-pointer ${
-                  isLiked
-                    ? "text-[#0061FF] bg-blue-50 dark:bg-blue-950/40"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex-1 rounded-lg py-2 flex items-center justify-center gap-2 text-sm cursor-pointer ${isLiked
+                  ? "text-[#0061FF] bg-blue-50 dark:bg-blue-950/40"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
                 onClick={handleLike}
               >
                 <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
