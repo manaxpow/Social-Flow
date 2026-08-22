@@ -2,8 +2,10 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { store } from "@/stores"; // Import Redux store
 import type { RootState } from "@/stores"; // Import RootState type
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/api",
+  baseURL: `${apiBaseUrl}/api`,
   timeout: 10000,
   withCredentials: true,
   headers: {
@@ -55,14 +57,14 @@ api.interceptors.response.use(
 
     // Nếu lỗi 401 và chưa từng retry request này
     if (error.response?.status === 401 && !originalRequest._retry) {
-      
+
       // Check if user is logging out - don't refresh token
       const state = store.getState() as RootState;
       if (state.auth.isLoggingOut) {
         console.log("[Axios] User is logging out, skipping token refresh");
         return Promise.reject(error);
       }
-      
+
       // Tránh lặp vô hạn nếu API refresh-token cũng lỗi (400 hoặc 401)
       if (originalRequest.url?.includes("/auth/refresh-token")) {
         console.error(`[Axios] Refresh token failed (${error.response.status}). Immediate redirect to login...`);
@@ -92,7 +94,7 @@ api.interceptors.response.use(
         console.log(`Attempting to refresh token (attempt ${retryCount}/${MAX_RETRIES})...`);
         // Gọi API refresh token (sử dụng http-only cookie nên không cần truyền data)
         await api.post("/auth/refresh-token");
-        
+
         processQueue(null);
         isRefreshing = false;
         retryCount = 0; // Reset retry count on success
@@ -103,7 +105,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        
+
         // Nếu refresh cũng tèo, thử lại nếu còn retry count,不然 redirect to login
         if (retryCount < MAX_RETRIES) {
           console.warn(`Refresh failed (attempt ${retryCount}/${MAX_RETRIES}). Retrying...`);
@@ -121,7 +123,7 @@ api.interceptors.response.use(
 
     // Xử lý thông báo lỗi như cũ
     if (error.response?.data) {
-       // @ts-ignore
+      // @ts-ignore
       error.message = error.response.data.detail || error.response.data.message || "Something went wrong";
     }
 

@@ -7,7 +7,7 @@ public static class Persistence
 {
     public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("socialflow");
         services.AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>();
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

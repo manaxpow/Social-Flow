@@ -28,52 +28,15 @@ try
 
     Log.Information(">>> SocialFlow Backend is starting up...");
 
-    // Add services layer   
+    // Add services layer
     builder.Services.AddInfrastructureServices(builder.Configuration);
     builder.Services.AddApplicationServices();
 
     builder.Services.AddSignalR();
 
-    var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("SocialFlowCorsPolicy", policy =>
-        {
-            if (origins != null && origins.Length > 0)
-            {
-                policy.WithOrigins(origins)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            }
-            else if (builder.Environment.IsDevelopment())
-            {
-                policy.SetIsOriginAllowed(origin => true)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+    builder.Services.AddCorsConfiguration(builder.Configuration, builder.Environment);
 
-                Log.Warning(">>> CORS is allowing any origin with credentials. Ensure this is only for Dev.");
-            }
-        });
-    });
-
-    builder.Services.AddRateLimiter(options =>
-    {
-        options.AddFixedWindowLimiter(policyName: "fixed", options =>
-        {
-            options.PermitLimit = 100;
-            options.Window = TimeSpan.FromMinutes(1);
-            options.QueueLimit = 2;
-            options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        });
-
-        options.OnRejected = async (context, token) =>
-        {
-            context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-            await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
-        };
-    });
+    builder.Services.AddRateLimitConfiguration();
 
     builder.Services.AddControllers().AddJsonOptions(options =>
     {
