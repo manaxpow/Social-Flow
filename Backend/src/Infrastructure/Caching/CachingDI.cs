@@ -7,7 +7,7 @@ public static class CachingExtensions
     public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration configuration)
     {
 
-        var connectionString = configuration.GetConnectionString("Redis")
+        var connectionString = configuration.GetConnectionString("redis")
         ?? throw new ArgumentNullException("Connection string 'Redis' not found.");
         services.AddStackExchangeRedisCache(options =>
         {
