@@ -30,7 +30,7 @@ public class EmailService(IOptions<EmailSettings> options) : IEmailService
     public async Task SendEmailConfirmationEmailAsync(string name, string email, string linkConfirmationToken)
     {
         var assembly = typeof(EmailService).Assembly;
-        var resourceName = "Infrastructure.Templates.ConfirmEmail.html";
+        var resourceName = "Infrastructure.Email.Templates.ConfirmEmail.html";
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
         {
@@ -50,7 +50,7 @@ public class EmailService(IOptions<EmailSettings> options) : IEmailService
     public async Task SendLockoutEmailAsync(string email, string name, string traceId)
     {
         var assembly = typeof(EmailService).Assembly;
-        var resourceName = "Infrastructure.Templates.LockoutEmail.html";
+        var resourceName = "Infrastructure.Email.Templates.LockoutEmail.html";
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
         {
@@ -72,7 +72,7 @@ public class EmailService(IOptions<EmailSettings> options) : IEmailService
     public async Task SendPasswordResetEmailAsync(string email, string linkResetToken)
     {
         var assembly = typeof(EmailService).Assembly;
-        var resourceName = "Infrastructure.Templates.ForgotPassword.html";
+        var resourceName = "Infrastructure.Email.Templates.ForgotPassword.html";
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
         {

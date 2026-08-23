@@ -1,15 +1,15 @@
 param(
     [Parameter(Mandatory=$false)]
     [string]$add,
-    
+
     [Switch]$up,
-    
+
     [Switch]$remove
 )
 
 $infra = "Infrastructure/Infrastructure.csproj"
 $api = "Api/Api.csproj"
-$out = "Persistence/Migrations"
+$out = "Persistence/EFCore/Migrations"
 
 if ($add) {
     dotnet ef migrations add $add --project $infra --startup-project $api --output-dir $out
