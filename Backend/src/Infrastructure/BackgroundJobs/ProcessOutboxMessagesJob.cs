@@ -17,19 +17,19 @@ public class ProcessOutboxMessagesJob : IOutboxProcessor
 
     public async Task Process()
     {
-        _logger.LogInformation("[OUTBOX] Starting to process messages...");
+        _logger.LogDebug("[OUTBOX] Starting to process messages...");
         var messages = await _unitOfWork.OutboxMessages.GetUnpublishedMessagesAsync(20);
 
         if (messages == null || !messages.Any())
         {
-            _logger.LogInformation("[OUTBOX] No messages to process.");
+            _logger.LogDebug("[OUTBOX] No messages to process.");
             return;
         }
         foreach (var message in messages)
         {
             try
             {
-                _logger.LogInformation($"[OUTBOX] Processing message: {message.Id}");
+                _logger.LogDebug($"[OUTBOX] Processing message: {message.Id}");
                 var domainEvent = JsonConvert.DeserializeObject<IDomainEvent>(message.Content, new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.All
