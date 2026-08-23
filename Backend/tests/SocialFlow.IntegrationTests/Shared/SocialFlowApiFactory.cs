@@ -35,16 +35,6 @@ public class SocialFlowApiFactory : WebApplicationFactory<Program>, IAsyncLifeti
         // 1. Phải Start Container TRƯỚC
         await _dbContainer.StartAsync();
         await _redisContainer.StartAsync();
-
-        // 2. Chạy Migration bằng một DbContext "tạm" hoàn toàn độc lập với WebHost
-        // Điều này đảm bảo bảng OutboxMessages có sẵn TRƯỚC KHI WebHost Start
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        optionsBuilder.UseNpgsql(_dbContainer.GetConnectionString());
-
-        optionsBuilder.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-
-        using var context = new ApplicationDbContext(optionsBuilder.Options);
-        await context.Database.MigrateAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -78,12 +68,15 @@ public class SocialFlowApiFactory : WebApplicationFactory<Program>, IAsyncLifeti
             services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
-                var interceptor = sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>();
+                var interceptor =
+                    sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>();
 
-                options.UseNpgsql(_dbContainer.GetConnectionString());
-                options.AddInterceptors(interceptor);
-
-                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                options
+                    .UseNpgsql(DbConnectionString)
+                    .UseSnakeCaseNamingConvention()
+                    .AddInterceptors(interceptor)
+                    .ConfigureWarnings(w =>
+                        w.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
 
             services.AddAuthentication(options =>
